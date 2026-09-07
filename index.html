@@ -255,6 +255,13 @@
     color: var(--text-dim);
   }
 
+  .listing-contact {
+    margin: 0;
+    font-family: var(--font-mono);
+    font-size: 11px;
+    color: var(--text-dim);
+  }
+
   @media (max-width: 480px) {
     .listing-time { margin-left: 0; }
     #filter { max-width: none; width: 100%; }
@@ -351,7 +358,7 @@
     var sortBy = sortFilterEl.value;
     var sorted = docs.slice();
     sorted.sort(function (a, b) {
-      if (sortBy === "user") return (a.discordUsername || "").localeCompare(b.discordUsername || "", "pl");
+      if (sortBy === "user") return (a.nickname || "").localeCompare(b.nickname || "", "pl");
       if (sortBy === "name") return (a.name || "").localeCompare(b.name || "", "pl");
       if (sortBy === "rune") {
         var ai = RUNE_COLORS.indexOf(runeInfoFor(a));
@@ -373,7 +380,8 @@
     var docsOfType = allDocs.filter(function (d) { return d.type === type; });
     var filtered = docsOfType.filter(function (d) {
       if (!query) return true;
-      return (d.discordUsername || "").toLowerCase().indexOf(query) !== -1 ||
+      return (d.nickname || "").toLowerCase().indexOf(query) !== -1 ||
+             (d.discordUsername || "").toLowerCase().indexOf(query) !== -1 ||
              (d.name || "").toLowerCase().indexOf(query) !== -1;
     });
     filtered = sortDocs(filtered);
@@ -397,7 +405,7 @@
 
       var user = document.createElement("span");
       user.className = "listing-user";
-      user.textContent = d.discordUsername || "?";
+      user.textContent = d.nickname || "?";
       top.appendChild(user);
 
       var name = document.createElement("span");
@@ -430,6 +438,13 @@
         desc.className = "listing-desc";
         desc.textContent = d.desc;
         row.appendChild(desc);
+      }
+
+      if (d.discordUsername) {
+        var contact = document.createElement("p");
+        contact.className = "listing-contact";
+        contact.textContent = "Kontakt (Discord): " + d.discordUsername;
+        row.appendChild(contact);
       }
 
       containerEl.appendChild(row);

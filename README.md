@@ -29,9 +29,13 @@ Zastąp wartości `TWOJ_...` danymi skopiowanymi z Firebase. Zapisz plik.
 
 Funkcja `discordInteractions` (w [`functions/`](functions)) obsługuje komendę slash `/tattoo` z trzema podkomendami:
 
-- **`/tattoo add runa:<kolor> tatuaz:<nazwa>`** — masz ten tatuaż i chcesz go oddać.
-- **`/tattoo search runa:<kolor> tatuaz:<nazwa>`** — szukasz tego tatuażu.
+- **`/tattoo add nick:<nick postaci> runa:<kolor> tatuaz:<nazwa>`** — masz ten tatuaż i chcesz go oddać.
+- **`/tattoo search nick:<nick postaci> runa:<kolor> tatuaz:<nazwa>`** — szukasz tego tatuażu.
 - **`/tattoo remove wpis:<Twoje ogłoszenie>`** — usuwa jedno z Twoich własnych ogłoszeń (podpowiedzi pokazują tylko Twoje wpisy).
+
+Przy `add`/`search` bot dodatkowo:
+- sprawdza, czy po drugiej stronie (kogoś kto szuka / coś oferuje) już istnieje pasujący wpis na ten sam tatuaż + runę — jeśli tak, dopisuje w odpowiedzi kto to jest i oznacza go (`@wzmianka`), żeby można było się od razu odezwać;
+- wysyła ogłoszenie na webhook Discorda (ten sam mechanizm co dawniej — patrz niżej), więc nowy wpis widać na dedykowanym kanale niezależnie od tego, gdzie komenda została użyta.
 
 Wymaga to konta z płatnością włączoną (plan **Blaze** — pay-as-you-go; przy małym ruchu koszt to praktycznie $0, patrz cennik Cloud Functions) oraz własnej aplikacji/bota w Discord Developer Portal.
 
@@ -45,6 +49,13 @@ Wymaga to konta z płatnością włączoną (plan **Blaze** — pay-as-you-go; p
    ```bash
    firebase functions:secrets:set DISCORD_PUBLIC_KEY
    ```
+
+6b. (Opcjonalnie, ale zalecane) Ustaw webhook do ogłoszeń — na Discordzie: ustawienia kanału, na którym mają się pojawiać ogłoszenia → **Integrations → Webhooks → New Webhook → Copy Webhook URL**, potem:
+
+   ```bash
+   firebase functions:secrets:set DISCORD_WEBHOOK_URL
+   ```
+   Jeśli pominiesz ten krok, komendy `/tattoo add`/`search` nadal działają — po prostu nie polecą dodatkowo na webhook (zostanie tylko odpowiedź bota w kanale, gdzie użyto komendy).
 
 7. Wdróż funkcję:
 

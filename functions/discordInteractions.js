@@ -5,6 +5,7 @@ const admin = require("firebase-admin");
 const { FLAT, RUNE_COLORS } = require("./tattoos");
 
 const discordPublicKey = defineSecret("DISCORD_PUBLIC_KEY");
+const discordWebhookUrl = defineSecret("DISCORD_WEBHOOK_URL");
 
 const InteractionType = {
   PING: 1,
@@ -39,6 +40,7 @@ function getDiscordUser(interaction) {
   const user = (interaction.member && interaction.member.user) || interaction.user || {};
   return {
     id: user.id || "",
+    mention: user.id ? "<@" + user.id + ">" : "",
     displayName: user.global_name || user.username || "Nieznany gracz"
   };
 }
@@ -46,15 +48,40 @@ function getDiscordUser(interaction) {
 function getSubcommand(interaction) {
   const options = (interaction.data && interaction.data.options) || [];
   const sub = options[0];
-  if (!sub) return { name: "", opts: {}, focused: null, options: [] };
+  if (!sub) return { name: "", opts: {}, focused: null };
   const opts = {};
   (sub.options || []).forEach((o) => { opts[o.name] = o.value; });
   return {
     name: sub.name,
     opts,
-    options: sub.options || [],
     focused: (sub.options || []).find((o) => o.focused) || null
   };
+}
+
+async function sendWebhook(content) {
+  const url = discordWebhookUrl.value();
+  if (!url) return;
+  try {
+    await fetch(url, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ content })
+    });
+  } catch (err) {
+    // Webhook jest tylko dodatkowym ogłoszeniem — brak dostawy nie blokuje zgłoszenia.
+  }
+}
+
+async function findMatches(oppositeType, name, runeKey) {
+  const snap = await admin.firestore()
+    .collection("listings")
+    .where("type", "==", oppositeType)
+    .limit(200)
+    .get();
+
+  return snap.docs
+    .map((d) => d.data())
+    .filter((d) => d.name === name && d.rune === runeKey);
 }
 
 async function handleAutocomplete(interaction, res) {
@@ -104,15 +131,16 @@ async function handleAutocomplete(interaction, res) {
 }
 
 async function handleAddOrSearch(sub, user, res) {
+  const nickname = String(sub.opts.nick || "").trim().slice(0, 24);
   const tattooName = String(sub.opts.tatuaz || "").trim();
   const item = FLAT.find((it) => it.name === tattooName);
   const rune = RUNE_COLORS.find((r) => r.key === sub.opts.runa);
 
-  if (!item || !rune) {
+  if (!nickname || !item || !rune) {
     res.json({
       type: InteractionResponseType.CHANNEL_MESSAGE_WITH_SOURCE,
       data: {
-        content: "Wybierz tatuaż z podpowiedzi (autouzupełnianie), a nie wpisuj go ręcznie.",
+        content: "Podaj nick postaci i wybierz tatuaż z podpowiedzi (autouzupełnianie), a nie wpisuj go ręcznie.",
         flags: EPHEMERAL
       }
     });
@@ -122,6 +150,7 @@ async function handleAddOrSearch(sub, user, res) {
   const listing = {
     discordUserId: user.id,
     discordUsername: user.displayName,
+    nickname,
     name: item.name,
     cls: item.cls,
     desc: item.desc,
@@ -133,13 +162,28 @@ async function handleAddOrSearch(sub, user, res) {
 
   await admin.firestore().collection("listings").add(listing);
 
-  const verb = sub.name === "add" ? "ma do oddania tatuaż" : "szuka tatuażu";
+  const isAdd = sub.name === "add";
+  const verb = isAdd ? "ma do oddania tatuaż" : "szuka tatuażu";
+  const headline =
+    "**" + nickname + "** (" + user.mention + ") " + verb + ": **" + item.name + "** [" + rune.label + "] (" + item.cls + ")\n> " + item.desc;
+
+  const matches = await findMatches(isAdd ? "search" : "add", item.name, rune.key);
+  var matchNote = "";
+  if (matches.length > 0) {
+    const names = matches
+      .map((m) => m.nickname + " (" + (m.discordUserId ? "<@" + m.discordUserId + ">" : m.discordUsername) + ")")
+      .join(", ");
+    matchNote = isAdd
+      ? "\n\n🔔 Ktoś już tego szuka: " + names
+      : "\n\n🔔 To jest już dostępne! Ma to: " + names;
+  }
+
+  const webhookPrefix = isAdd ? "🟢 Nowa oferta" : "🔍 Nowe poszukiwanie";
+  await sendWebhook(webhookPrefix + " — " + headline + matchNote);
+
   res.json({
     type: InteractionResponseType.CHANNEL_MESSAGE_WITH_SOURCE,
-    data: {
-      content:
-        "**" + user.displayName + "** " + verb + ": **" + item.name + "** [" + rune.label + "] (" + item.cls + ")\n> " + item.desc
-    }
+    data: { content: headline + matchNote }
   });
 }
 
@@ -194,7 +238,7 @@ async function handleCommand(interaction, res) {
 }
 
 exports.discordInteractions = onRequest(
-  { region: "us-central1", secrets: [discordPublicKey] },
+  { region: "us-central1", secrets: [discordPublicKey, discordWebhookUrl] },
   async (req, res) => {
     if (!verifySignature(req, discordPublicKey.value())) {
       res.status(401).send("Bad request signature");

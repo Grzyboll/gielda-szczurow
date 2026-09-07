@@ -20,9 +20,15 @@ const runeChoices = RUNE_COLORS.map((r) => ({ name: r.label, value: r.key }));
 
 const addSearchOptions = [
   {
+    name: "nick",
+    description: "Nick Twojej postaci",
+    type: 3, // STRING
+    required: true
+  },
+  {
     name: "runa",
     description: "Kolor runy",
-    type: 3, // STRING
+    type: 3,
     required: true,
     choices: runeChoices
   },
