@@ -373,7 +373,7 @@
   <header>
     <p class="eyebrow">MUD &middot; zgłoszenia tatuaży</p>
     <h1>Cech Tatuażystów</h1>
-    <p class="lede">Podaj nick swojej postaci i wybierz runę lub bonus klasowy, o który prosisz kowala run. Zgłoszenie trafia od razu na wspólną listę gildii, widoczną dla wszystkich.</p>
+    <p class="lede">Podaj nick swojej postaci, wybierz bonus klasowy oraz kolor runy, o który prosisz kowala run. Zgłoszenie trafia od razu na wspólną listę gildii, widoczną dla wszystkich.</p>
   </header>
 
   <form id="request-form" class="card">
@@ -385,7 +385,7 @@
     <div class="field">
       <label for="tattoo">Tatuaż</label>
       <select id="tattoo" required>
-        <option value="" disabled selected>Wybierz runę lub bonus klasowy…</option>
+        <option value="" disabled selected>Wybierz bonus klasowy…</option>
       </select>
     </div>
 
@@ -448,18 +448,14 @@
     appId: "1:216624679255:web:23dcbca159365a98d8d612"
   };
 
-  // Discord webhook (opcjonalny) — powiadomienie o nowym zgłoszeniu na kanale gildii.
-  // Zostaw jako "TWOJ_DISCORD_WEBHOOK_URL", jeśli nie chcesz powiadomień.
-  var discordWebhookUrl = "TWOJ_DISCORD_WEBHOOK_URL";
+  // Powiadomienie na Discordzie o nowym zgłoszeniu — obsługiwane przez Cloud Function
+  // "notifyDiscord" (patrz folder functions/), żeby prawdziwy webhook URL nie trafiał
+  // do kodu strony. Zostaw puste, jeśli funkcja jeszcze nie jest wdrożona — powiadomienia
+  // po prostu się nie wyślą, reszta strony działa normalnie.
+  var notifyDiscordUrl = "https://us-central1-cech-szczurow.cloudfunctions.net/notifyDiscord";
   // ==== KONIEC KONFIGURACJI ====
 
   var TATTOO_GROUPS = [
-    { group: "Runy na twarz — dostępne dla każdej klasy", items: [
-      { name: "runa zniszczenia", cls: "Wszystkie klasy", desc: "Zwiększa obrażenia od ciosów krytycznych.", color: "danger", isBase: true },
-      { name: "runa celności", cls: "Wszystkie klasy", desc: "Zwiększa szansę na trafienie krytyczne.", color: "danger", isBase: true },
-      { name: "runa obrony", cls: "Wszystkie klasy", desc: "Redukuje otrzymywane obrażenia.", isBase: true },
-      { name: "runa umysłu", cls: "Wszystkie klasy", desc: "Skraca czas zapamiętywania zaklęć oraz zmniejsza szansę na spalenie zaklęcia.", isBase: true }
-    ]},
     { group: "Wojownik", items: [
       { name: "mistrz parowania", cls: "Wojownik", desc: "Znacząco wzmacnia umiejętność parry i shield block, dodatkowo istnieje szansa na bierne parry." },
       { name: "niewzruszony obrońca", cls: "Wojownik", desc: "Wojownik pewnie stoi na ziemi i ciężko posłać go na ziemię, dodatkowo skraca czas ogłuszenia i unieruchomienia." },
@@ -535,17 +531,9 @@
     { key: "zniszczenie", label: "Zniszczenie (czerwona)", swatch: "#8a2e1f" }
   ];
 
-  var BASE_RUNE_KEY_BY_NAME = {
-    "runa zniszczenia": "zniszczenie",
-    "runa celności": "celnosc",
-    "runa obrony": "obrona",
-    "runa umysłu": "umysl"
-  };
-
   function runeInfoFor(d) {
-    var key = d.rune || BASE_RUNE_KEY_BY_NAME[d.name];
-    if (!key) return null;
-    return RUNE_COLORS.filter(function (r) { return r.key === key; })[0] || null;
+    if (!d.rune) return null;
+    return RUNE_COLORS.filter(function (r) { return r.key === d.rune; })[0] || null;
   }
 
   var FLAT = [];
@@ -562,7 +550,6 @@
       var opt = document.createElement("option");
       opt.value = String(idx);
       opt.textContent = it.name;
-      if (it.color === "danger") opt.style.color = "var(--danger)";
       optgroup.appendChild(opt);
     });
     selectEl.appendChild(optgroup);
@@ -587,19 +574,12 @@
     var item = FLAT[Number(selectEl.value)];
     if (!item) { detailBox.hidden = true; runeField.hidden = true; runeEl.required = false; return; }
     detailName.textContent = item.name;
-    detailName.style.color = item.color === "danger" ? "var(--danger)" : "";
     detailClass.textContent = item.cls;
     detailDesc.textContent = item.desc;
     detailBox.hidden = false;
 
-    if (item.isBase) {
-      runeField.hidden = true;
-      runeEl.required = false;
-      runeEl.value = "";
-    } else {
-      runeField.hidden = false;
-      runeEl.required = true;
-    }
+    runeField.hidden = false;
+    runeEl.required = true;
   });
 
   var nicknameEl = document.getElementById("nickname");
@@ -717,7 +697,6 @@
       var name = document.createElement("span");
       name.className = "request-name";
       name.textContent = d.name || "";
-      if (d.color === "danger") name.style.color = "var(--danger)";
       top.appendChild(name);
 
       if (d.runeLabel) {
@@ -810,12 +789,16 @@
   sortFilterEl.addEventListener("change", renderList);
 
   function notifyDiscord(entry) {
-    if (discordWebhookUrl.indexOf("TWOJ_") === 0) return;
-    fetch(discordWebhookUrl, {
+    if (!notifyDiscordUrl) return;
+    fetch(notifyDiscordUrl, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({
-        content: "**" + entry.nickname + "** prosi o tatuaż: **" + entry.name + "**" + (entry.runeLabel ? " [" + entry.runeLabel + "]" : "") + " (" + entry.cls + ")\n> " + entry.desc
+        nickname: entry.nickname,
+        name: entry.name,
+        cls: entry.cls,
+        desc: entry.desc,
+        runeLabel: entry.runeLabel
       })
     }).catch(function () {
       // Powiadomienie na Discord jest opcjonalne — brak dostawy nie blokuje zgłoszenia.
@@ -874,15 +857,11 @@
     }
 
     var item = FLAT[Number(idx)];
-    var rune = null;
-
-    if (!item.isBase) {
-      rune = RUNE_COLORS.filter(function (r) { return r.key === runeEl.value; })[0];
-      if (!rune) {
-        formStatus.textContent = "Wybierz kolor runy dla tego tatuażu.";
-        formStatus.dataset.tone = "error";
-        return;
-      }
+    var rune = RUNE_COLORS.filter(function (r) { return r.key === runeEl.value; })[0];
+    if (!rune) {
+      formStatus.textContent = "Wybierz kolor runy dla tego tatuażu.";
+      formStatus.dataset.tone = "error";
+      return;
     }
 
     if (!dbRef) {
@@ -902,9 +881,8 @@
       name: item.name,
       cls: item.cls,
       desc: item.desc,
-      color: item.color || null,
-      rune: rune ? rune.key : null,
-      runeLabel: rune ? rune.label : null
+      rune: rune.key,
+      runeLabel: rune.label
     };
 
     if (editingId) {

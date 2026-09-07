@@ -27,19 +27,28 @@ Zastąp wartości `TWOJ_...` danymi skopiowanymi z Firebase. Zapisz plik.
 
 ## 3. (Opcjonalnie) Powiadomienia na Discordzie
 
-Chcesz, żeby każde zgłoszenie leciało jako wiadomość na kanał Discorda:
+Powiadomienia idą przez Cloud Function `notifyDiscord` (folder [`functions/`](functions)), nie przez `index.html` — dzięki temu prawdziwy adres webhooka nigdy nie trafia do kodu strony ani do (publicznego) repo.
 
-1. Na Discordzie wejdź w ustawienia kanału, na którym mają się pojawiać zgłoszenia (może być istniejący kanał albo nowy, np. `#zgloszenia-tatuazy`) → **Integrations → Webhooks → New Webhook**.
-2. Nadaj nazwę webhookowi, kliknij **Copy Webhook URL**.
-3. W `index.html` znajdź linijkę:
+Wymaga to konta z płatnością włączoną (plan **Blaze** — pay-as-you-go; przy małym ruchu koszt to praktycznie $0, patrz cennik Cloud Functions).
 
-   ```js
-   var discordWebhookUrl = "TWOJ_DISCORD_WEBHOOK_URL";
+1. Zainstaluj [Node.js](https://nodejs.org/) (LTS) i Firebase CLI: `npm install -g firebase-tools`.
+2. `firebase login` — zaloguj się kontem Google używanym w Firebase.
+3. Na Discordzie: ustawienia kanału, na którym mają się pojawiać zgłoszenia → **Integrations → Webhooks → New Webhook** → **Copy Webhook URL**.
+4. W katalogu projektu ustaw sekret (poprosi Cię o wklejenie URL w terminalu — nie w pliku):
+
+   ```bash
+   firebase functions:secrets:set DISCORD_WEBHOOK_URL
    ```
 
-   i zastąp skopiowanym adresem URL. Zapisz plik.
+5. Wdróż funkcję:
 
-Jeśli zostawisz wartość `TWOJ_DISCORD_WEBHOOK_URL` bez zmian, powiadomienia po prostu się nie wysyłają — reszta strony działa normalnie.
+   ```bash
+   firebase deploy --only functions
+   ```
+
+6. Firebase wypisze adres wdrożonej funkcji (postaci `https://us-central1-<projectId>.cloudfunctions.net/notifyDiscord`). W `index.html` sprawdź, czy zmienna `notifyDiscordUrl` wskazuje na ten sam adres.
+
+Jeśli funkcja nie jest wdrożona, powiadomienia po prostu się nie wysyłają — reszta strony działa normalnie.
 
 ## 4. Wystaw stronę online (za darmo)
 
