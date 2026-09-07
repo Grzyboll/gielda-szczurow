@@ -50,6 +50,43 @@ Wymaga to konta z płatnością włączoną (plan **Blaze** — pay-as-you-go; p
 
 Jeśli funkcja nie jest wdrożona, powiadomienia po prostu się nie wysyłają — reszta strony działa normalnie.
 
+## 3b. (Opcjonalnie) Bot Discorda — zgłaszanie tatuaży komendą `/tatuaz`
+
+Osobna funkcja `discordInteractions` (też w [`functions/`](functions)) obsługuje komendę slash `/tatuaz`, która zapisuje zgłoszenie prosto do tej samej bazy co strona. Wymaga to własnej aplikacji/bota w Discord Developer Portal (oddzielnej od zwykłego webhooka z punktu 3).
+
+1. Wejdź na https://discord.com/developers/applications → **New Application** → nadaj nazwę (np. "Kowal Run") → utwórz.
+2. Zakładka **General Information** — skopiuj **Application ID** oraz **Public Key**.
+3. Zakładka **Bot** → **Reset Token** (albo od razu zobaczysz token) → skopiuj **token bota** (pokazuje się tylko raz).
+4. Ustaw sekret z **Public Key** (potrzebny funkcji do weryfikacji, że zapytania faktycznie przychodzą z Discorda — wklej wartość z kroku 2):
+
+   ```bash
+   firebase functions:secrets:set DISCORD_PUBLIC_KEY
+   ```
+
+5. Wdróż funkcję:
+
+   ```bash
+   firebase deploy --only functions
+   ```
+   Zapisz adres funkcji `discordInteractions` (postaci `https://us-central1-<projectId>.cloudfunctions.net/discordInteractions`).
+
+6. Wróć do Developer Portal → **General Information** → pole **Interactions Endpoint URL** → wklej tam adres z kroku 5 → **Save Changes**. Discord od razu wyśle testowe zapytanie (PING) — jeśli funkcja jest wdrożona poprawnie, zapisze się bez błędu.
+
+7. Zarejestruj komendę `/tatuaz` (robisz to raz, i za każdym razem gdy zmienisz jej definicję w `functions/register-commands.js`). W terminalu, w folderze `functions`:
+
+   **PowerShell:**
+   ```powershell
+   $env:DISCORD_APPLICATION_ID = "wklej Application ID"
+   $env:DISCORD_BOT_TOKEN = "wklej token bota"
+   node register-commands.js
+   ```
+
+8. Zaproś bota na serwer: Developer Portal → **OAuth2 → URL Generator** → zaznacz scope **`applications.commands`** (samo to wystarczy do obsługi komend slash — scope `bot` jest potrzebny tylko jeśli chcesz mu dodatkowo nadać inne uprawnienia) → skopiuj wygenerowany link → otwórz go w przeglądarce → wybierz swój serwer.
+
+9. Na Discordzie wpisz `/tatuaz` na dowolnym kanale, gdzie jest bot — powinny pojawić się pola `nick`, `bonus` (z podpowiedziami po zaczęciu pisania) i `runa`.
+
+Uwaga: Public Key **nie jest tajny** (Discord i tak go publikuje), ale trzymamy go jako sekret dla spójności z resztą konfiguracji — nic złego się nie stanie jeśli ktoś go pozna. Token bota **jest** tajny i nigdzie w repo się nie zapisuje — używasz go tylko raz, lokalnie, do rejestracji komend.
+
 ## 4. Wystaw stronę online (za darmo)
 
 Najprostsza opcja — bez instalowania czegokolwiek:
