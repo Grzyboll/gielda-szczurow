@@ -100,35 +100,20 @@
   .lede {
     color: var(--text-dim);
     font-size: 16px;
-    max-width: 56ch;
+    max-width: 60ch;
     margin: 0;
   }
 
-  .card {
+  .lede code {
+    font-family: var(--font-mono);
+    font-size: 0.9em;
     background: var(--surface);
     border: 1px solid var(--border);
-    border-radius: 4px;
-    padding: 28px;
-    display: flex;
-    flex-direction: column;
-    gap: 18px;
+    border-radius: 3px;
+    padding: 1px 6px;
   }
 
-  .field {
-    display: flex;
-    flex-direction: column;
-    gap: 6px;
-  }
-
-  label {
-    font-family: var(--font-mono);
-    font-size: 12px;
-    letter-spacing: 0.08em;
-    text-transform: uppercase;
-    color: var(--text-dim);
-  }
-
-  input[type="text"], input[type="search"], select {
+  input[type="search"], select {
     font: inherit;
     font-family: var(--font-mono);
     font-size: 15px;
@@ -142,75 +127,12 @@
 
   select { appearance: auto; }
 
-  input:focus-visible, select:focus-visible, button:focus-visible {
+  input:focus-visible, select:focus-visible {
     outline: 2px solid var(--accent);
     outline-offset: 2px;
   }
 
-  .detail {
-    border-left: 3px solid var(--accent);
-    background: var(--surface-2);
-    padding: 12px 16px;
-    border-radius: 0 3px 3px 0;
-    display: flex;
-    flex-direction: column;
-    gap: 4px;
-  }
-
-  .detail-name {
-    font-weight: 700;
-    font-size: 16px;
-  }
-
-  .detail-class {
-    display: inline-block;
-    width: fit-content;
-    font-family: var(--font-mono);
-    font-weight: 700;
-    font-size: 11px;
-    letter-spacing: 0.06em;
-    text-transform: uppercase;
-    color: var(--accent-contrast);
-    background: var(--accent-strong);
-    border-radius: 999px;
-    padding: 3px 10px;
-  }
-
-  .detail-desc {
-    margin: 0;
-    font-size: 15px;
-    color: var(--text);
-  }
-
-  .submit-btn {
-    font-family: var(--font-mono);
-    font-size: 14px;
-    font-weight: 700;
-    letter-spacing: 0.06em;
-    text-transform: uppercase;
-    color: var(--accent-contrast);
-    background: var(--accent);
-    border: none;
-    border-radius: 3px;
-    padding: 13px 20px;
-    cursor: pointer;
-    transition: background 120ms ease;
-  }
-
-  .submit-btn:hover:not(:disabled) { background: var(--accent-strong); }
-  .submit-btn:disabled { opacity: 0.5; cursor: not-allowed; }
-
-  .form-status {
-    margin: 0;
-    font-size: 13px;
-    font-family: var(--font-mono);
-    min-height: 1.2em;
-  }
-
-  .form-status[data-tone="ok"] { color: var(--accent); }
-  .form-status[data-tone="error"] { color: var(--danger); }
-
-  .board { display: flex; flex-direction: column; gap: 14px; }
+  .board { display: flex; flex-direction: column; gap: 28px; }
 
   .board-head {
     display: flex;
@@ -226,17 +148,27 @@
     margin: 0;
   }
 
+  h3 {
+    font-family: var(--font-mono);
+    font-size: 13px;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--text-dim);
+    margin: 0 0 12px;
+  }
+
   .board-filters {
     display: flex;
     gap: 10px;
     flex-wrap: wrap;
   }
 
-  #filter { max-width: 240px; }
-  #status-filter { max-width: 140px; width: auto; }
+  #filter { max-width: 260px; }
   #sort-filter { max-width: 190px; width: auto; }
 
-  .request-list {
+  .board-section { display: flex; flex-direction: column; }
+
+  .listing-list {
     display: flex;
     flex-direction: column;
     gap: 10px;
@@ -249,7 +181,7 @@
     padding: 20px 0;
   }
 
-  .request-row {
+  .listing-row {
     display: flex;
     flex-direction: column;
     gap: 4px;
@@ -260,30 +192,26 @@
     padding: 14px 16px;
   }
 
-  .request-row[data-mine="true"] {
-    background: var(--surface-2);
-  }
-
-  .request-row-top {
+  .listing-row-top {
     display: flex;
     align-items: baseline;
     gap: 10px;
     flex-wrap: wrap;
   }
 
-  .request-nick {
+  .listing-user {
     font-family: var(--font-mono);
     font-weight: 700;
     font-size: 14px;
   }
 
-  .request-name {
+  .listing-name {
     font-family: var(--font-mono);
     font-weight: 600;
     font-size: 14px;
   }
 
-  .request-tag {
+  .listing-tag {
     font-family: var(--font-mono);
     font-weight: 700;
     font-size: 11px;
@@ -295,7 +223,7 @@
     padding: 3px 10px;
   }
 
-  .request-rune {
+  .listing-rune {
     display: inline-flex;
     align-items: center;
     gap: 5px;
@@ -304,7 +232,7 @@
     color: var(--text-dim);
   }
 
-  .request-rune::before {
+  .listing-rune::before {
     content: "";
     width: 9px;
     height: 9px;
@@ -314,53 +242,22 @@
     flex-shrink: 0;
   }
 
-  .request-row[data-closed="true"] { opacity: 0.6; }
-
-  .closed-badge {
-    font-family: var(--font-mono);
-    font-size: 11px;
-    color: var(--accent);
-  }
-
-  .request-actions {
-    display: flex;
-    gap: 8px;
-    margin-top: 2px;
-  }
-
-  .action-btn {
-    font-family: var(--font-mono);
-    font-size: 11px;
-    letter-spacing: 0.04em;
-    text-transform: uppercase;
-    background: none;
-    border: 1px solid var(--border);
-    color: var(--text-dim);
-    border-radius: 3px;
-    padding: 4px 9px;
-    cursor: pointer;
-  }
-
-  .action-btn:hover { border-color: var(--accent); color: var(--accent); }
-  .action-btn.danger:hover { border-color: var(--danger); color: var(--danger); }
-
-  .request-time {
+  .listing-time {
     margin-left: auto;
     font-family: var(--font-mono);
     font-size: 11px;
     color: var(--text-dim);
   }
 
-  .request-desc {
+  .listing-desc {
     margin: 0;
     font-size: 14px;
     color: var(--text-dim);
   }
 
   @media (max-width: 480px) {
-    .request-time { margin-left: 0; }
+    .listing-time { margin-left: 0; }
     #filter { max-width: none; width: 100%; }
-    #status-filter { max-width: none; width: 100%; }
     #sort-filter { max-width: none; width: 100%; }
     .board-head { flex-direction: column; align-items: stretch; }
     .board-filters { flex-direction: column; }
@@ -371,64 +268,37 @@
 
 <div class="page">
   <header>
-    <p class="eyebrow">MUD &middot; zgłoszenia tatuaży</p>
+    <p class="eyebrow">MUD &middot; giełda tatuaży</p>
     <h1>Cech Tatuażystów</h1>
-    <p class="lede">Podaj nick swojej postaci, wybierz bonus klasowy oraz kolor runy, o który prosisz kowala run. Zgłoszenie trafia od razu na wspólną listę gildii, widoczną dla wszystkich.</p>
+    <p class="lede">Przeglądaj tatuaże, które gracze oferują do oddania, oraz te, których szukają. Nowe ogłoszenia dodaje się wyłącznie na Discordzie komendami <code>/tattoo add</code>, <code>/tattoo search</code> i <code>/tattoo remove</code> — ta strona służy tylko do przeglądania.</p>
   </header>
-
-  <form id="request-form" class="card">
-    <div class="field">
-      <label for="nickname">Nick postaci</label>
-      <input id="nickname" type="text" maxlength="24" autocomplete="off" placeholder="np. Threxxar" required>
-    </div>
-
-    <div class="field">
-      <label for="tattoo">Tatuaż</label>
-      <select id="tattoo" required>
-        <option value="" disabled selected>Wybierz bonus klasowy…</option>
-      </select>
-    </div>
-
-    <div id="tattoo-detail" class="detail" hidden>
-      <span class="detail-name" id="tattoo-detail-name"></span>
-      <span class="detail-class" id="tattoo-detail-class"></span>
-      <p class="detail-desc" id="tattoo-detail-desc"></p>
-    </div>
-
-    <div class="field" id="rune-field" hidden>
-      <label for="rune">Runa</label>
-      <select id="rune">
-        <option value="" disabled selected>Wybierz kolor runy…</option>
-      </select>
-    </div>
-
-    <div style="display:flex; gap:10px; align-items:center;">
-      <button type="submit" class="submit-btn" id="submit-btn">Złóż zgłoszenie</button>
-      <button type="button" class="action-btn" id="cancel-edit-btn" hidden>Anuluj edycję</button>
-    </div>
-    <p class="form-status" id="form-status" role="status"></p>
-  </form>
 
   <section class="board">
     <div class="board-head">
-      <h2>Zgłoszenia gildii</h2>
+      <h2>Giełda gildii</h2>
       <div class="board-filters">
-        <select id="status-filter">
-          <option value="all">Wszystkie</option>
-          <option value="open">Otwarte</option>
-          <option value="closed">Zamknięte</option>
-        </select>
         <select id="sort-filter">
           <option value="date">Sortuj: data dodania</option>
-          <option value="nick">Sortuj: nick</option>
+          <option value="user">Sortuj: gracz</option>
           <option value="name">Sortuj: tatuaż</option>
           <option value="rune">Sortuj: runa</option>
         </select>
-        <input id="filter" type="search" placeholder="Szukaj po nicku lub tatuażu…">
+        <input id="filter" type="search" placeholder="Szukaj po graczu lub tatuażu…">
       </div>
     </div>
-    <div id="request-list" class="request-list">
-      <p class="empty-state">Wczytywanie zgłoszeń…</p>
+
+    <div class="board-section">
+      <h3>Dostępne (oddawane)</h3>
+      <div id="list-add" class="listing-list">
+        <p class="empty-state">Wczytywanie…</p>
+      </div>
+    </div>
+
+    <div class="board-section">
+      <h3>Poszukiwane</h3>
+      <div id="list-search" class="listing-list">
+        <p class="empty-state">Wczytywanie…</p>
+      </div>
     </div>
   </section>
 </div>
@@ -447,82 +317,7 @@
     messagingSenderId: "216624679255",
     appId: "1:216624679255:web:23dcbca159365a98d8d612"
   };
-
-  // Powiadomienie na Discordzie o nowym zgłoszeniu — obsługiwane przez Cloud Function
-  // "notifyDiscord" (patrz folder functions/), żeby prawdziwy webhook URL nie trafiał
-  // do kodu strony. Zostaw puste, jeśli funkcja jeszcze nie jest wdrożona — powiadomienia
-  // po prostu się nie wyślą, reszta strony działa normalnie.
-  var notifyDiscordUrl = "https://us-central1-cech-szczurow.cloudfunctions.net/notifyDiscord";
   // ==== KONIEC KONFIGURACJI ====
-
-  var TATTOO_GROUPS = [
-    { group: "Wojownik", items: [
-      { name: "mistrz parowania", cls: "Wojownik", desc: "Znacząco wzmacnia umiejętność parry i shield block, dodatkowo istnieje szansa na bierne parry." },
-      { name: "niewzruszony obrońca", cls: "Wojownik", desc: "Wojownik pewnie stoi na ziemi i ciężko posłać go na ziemię, dodatkowo skraca czas ogłuszenia i unieruchomienia." },
-      { name: "fechmistrz", cls: "Wojownik", desc: "Wzmacnia umiejętność wardance. Stan skupienia utrzymuje się także poza walką, a ucieczka zmienia się w taktyczny odwrót." },
-      { name: "miażdżyciel", cls: "Wojownik", desc: "Wzmacnia umiejętność overwhelming strike. W stanie skupienia umiejętność staje się bierna." }
-    ]},
-    { group: "Barbarzyńca", items: [
-      { name: "szaleniec", cls: "Barbarzyńca", desc: "Znacząco wydłuża czas działania i wzmacnia działanie umiejętności berserk." },
-      { name: "rębacz", cls: "Barbarzyńca", desc: "Wzmacnia umiejętność charge, szansę na wywrócenie przeciwnika oraz daje możliwość użycia umiejętności podczas tankowania." },
-      { name: "wirująca zagłada", cls: "Barbarzyńca", desc: "Wzmacnia umiejętność whirlwind oraz daje jej szansę na bierne użycie." },
-      { name: "przytłaczające ataki", cls: "Barbarzyńca", desc: "Pozwala używać przytłaczających ataków (might blows) w trybie automatycznym. Berserkowanie podtrzymuje ten stan." }
-    ]},
-    { group: "Paladyn", items: [
-      { name: "święty wojownik", cls: "Paladyn", desc: "Daje dostęp do piątego kręgu wraz z czarami sanctuary, divine power oraz consecrate." },
-      { name: "obrońca wiary", cls: "Paladyn", desc: "Wzmacnia umiejętności obronne." }
-    ]},
-    { group: "Kleryk", items: [
-      { name: "wybraniec bogów", cls: "Kleryk", desc: "Znacznie wzmacnia czary leczące." },
-      { name: "bitewne przeszkolenie", cls: "Kleryk", desc: "Wzmacnia możliwości bojowe kapłana, dodatkowo podczas walki ma szansę na odzyskanie rzuconego czaru." }
-    ]},
-    { group: "Mag", items: [
-      { name: "mistrz zaklęć", cls: "Mag", desc: "Ma wpływ na przebicie odporności i siłę rzucanych czarów, dodatkowo podczas walki ma szansę na odzyskanie rzuconego czaru." }
-    ]},
-    { group: "Druid", items: [
-      { name: "obrońca natury", cls: "Druid", desc: "Umożliwia rzucanie czarów podczas posiadania szponów oraz daje dostęp do czaru nature ally IV." },
-      { name: "drzewko szczęścia", cls: "Druid", desc: "Czyni każde miejsce przyjaznym dla druida." },
-      { name: "zmiennokształtny", cls: "Druid", desc: "Wzmacnia przemiany druida oraz pozwala używać zaklęć w zwierzęcej formie." },
-      { name: "przyczajony łowca", cls: "Druid", desc: "Pantera zawsze szuka cienia, aby się przyczaić." },
-      { name: "wilczy skowyt", cls: "Druid", desc: "Wilk może użyć więcej niż jednego wilczego wycia w danym czasie." },
-      { name: "taran", cls: "Druid", desc: "Podczas tratowania niedźwiedź może powalić znacznie większego przeciwnika." }
-    ]},
-    { group: "Złodziej", items: [
-      { name: "cień", cls: "Złodziej", desc: "Podczas działania sneaka złodziej automatycznie się ukrywa, wykorzystując swoją umiejętność hide." },
-      { name: "mistrz zamków", cls: "Złodziej", desc: "Od poziomu mistrzowskiego wzmacnia umiejętność otwierania zamków w skrzyniach, omija wszelkie blokady." },
-      { name: "mistrz uników", cls: "Złodziej", desc: "Wzmacnia umiejętność dodge oraz daje jej szansę na bierne użycie." },
-      { name: "cios śmierci", cls: "Złodziej", desc: "Znacząco zwiększa zabójcze umiejętności złodzieja." },
-      { name: "wachlarz ostrzy", cls: "Złodziej", desc: "Podczas używania uników złodziej ma szansę na bierne użycie bladesplash na przeciwniku, którego ataku uniknął." }
-    ]},
-    { group: "Czarny Rycerz", items: [
-      { name: "twardy blok", cls: "Czarny Rycerz", desc: "Daje dostęp do umiejętności shield block na 31 poziomie." },
-      { name: "władca marionetek", cls: "Czarny Rycerz", desc: "Wzmacnia czas kontrolowania nieumarłych i avatara niemal bez końca." }
-    ]},
-    { group: "Nekromanta, Czarny Rycerz", items: [
-      { name: "nieumarły", cls: "Nekromanta, Czarny Rycerz", desc: "Przemiana w nieumarłą istotę." }
-    ]},
-    { group: "Nomad", items: [
-      { name: "tancerz", cls: "Nomad", desc: "Umożliwia zmianę stylu walki bladefury/bladedance w trakcie walki." },
-      { name: "wirujące ostrza", cls: "Nomad", desc: "Wzmacnia umiejętność cyclone oraz daje jej szansę na bierne użycie." },
-      { name: "piaski pustyni", cls: "Nomad", desc: "Czyni każde miejsce przyjaznym dla nomada." },
-      { name: "taneczny krok", cls: "Nomad", desc: "Nomad nieprzerwanie pozostaje w swoim tanecznym transie, ale wie, kiedy zejść z parkietu niepokonanym." }
-    ]},
-    { group: "Wędrowiec", items: [
-      { name: "grabieżca", cls: "Wędrowiec", desc: "Zwiększa szansę na odkrycie nietypowych łupów w plądrowanych ciałach." }
-    ]},
-    { group: "Triki specjalne", items: [
-      { name: "oko cyklonu", cls: "Trick: cyclone", desc: "Zwiększa szansę na trick." },
-      { name: "łowca niewolników", cls: "Trick: entwine", desc: "Zwiększa szansę na trick." },
-      { name: "między młotem a kowadłem", cls: "Trick: thundering whack", desc: "Zwiększa szansę na trick." }
-    ]},
-    { group: "Wszystkie klasy", items: [
-      { name: "charyzmatyczny przywódca", cls: "Wszystkie klasy", desc: "Umożliwia wydanie rozkazu wszystkim podwładnym za jednym razem — order all." },
-      { name: "pakt ze śmiercią", cls: "Wszystkie klasy", desc: "Pan śmierci czasem odwraca wzrok, co czyni śmierć znacznie przyjemniejszą." },
-      { name: "myto ogarów", cls: "Wszystkie klasy", desc: "Opłacone myto (trzeba mieć przy sobie gotówkę) daje szansę na zachowanie części ekwipunku przy śmierci. Nie działa w PvP." },
-      { name: "bezpieczny skarbiec", cls: "Wszystkie klasy", desc: "Daje szansę na zachowanie części ekwipunku przy śmierci. Nie działa w PvP." },
-      { name: "głębokie kieszenie", cls: "Wszystkie klasy", desc: "Podczas plądrowania zwłok rabuś może coś przeoczyć — daje szansę na zachowanie części ekwipunku przy śmierci. Nie działa w PvP." }
-    ]}
-  ];
 
   var RUNE_COLORS = [
     { key: "celnosc", label: "Celność (niebieska)", swatch: "#3a6ea8" },
@@ -536,100 +331,6 @@
     return RUNE_COLORS.filter(function (r) { return r.key === d.rune; })[0] || null;
   }
 
-  var FLAT = [];
-  TATTOO_GROUPS.forEach(function (g) {
-    g.items.forEach(function (it) { FLAT.push(it); });
-  });
-
-  var selectEl = document.getElementById("tattoo");
-  TATTOO_GROUPS.forEach(function (g) {
-    var optgroup = document.createElement("optgroup");
-    optgroup.label = g.group;
-    g.items.forEach(function (it) {
-      var idx = FLAT.indexOf(it);
-      var opt = document.createElement("option");
-      opt.value = String(idx);
-      opt.textContent = it.name;
-      optgroup.appendChild(opt);
-    });
-    selectEl.appendChild(optgroup);
-  });
-
-  var detailBox = document.getElementById("tattoo-detail");
-  var detailName = document.getElementById("tattoo-detail-name");
-  var detailClass = document.getElementById("tattoo-detail-class");
-  var detailDesc = document.getElementById("tattoo-detail-desc");
-
-  var runeField = document.getElementById("rune-field");
-  var runeEl = document.getElementById("rune");
-  RUNE_COLORS.forEach(function (r) {
-    var opt = document.createElement("option");
-    opt.value = r.key;
-    opt.textContent = r.label;
-    opt.style.color = r.swatch;
-    runeEl.appendChild(opt);
-  });
-
-  selectEl.addEventListener("change", function () {
-    var item = FLAT[Number(selectEl.value)];
-    if (!item) { detailBox.hidden = true; runeField.hidden = true; runeEl.required = false; return; }
-    detailName.textContent = item.name;
-    detailClass.textContent = item.cls;
-    detailDesc.textContent = item.desc;
-    detailBox.hidden = false;
-
-    runeField.hidden = false;
-    runeEl.required = true;
-  });
-
-  var nicknameEl = document.getElementById("nickname");
-  var formStatus = document.getElementById("form-status");
-  var submitBtn = document.getElementById("submit-btn");
-  var cancelEditBtn = document.getElementById("cancel-edit-btn");
-  var filterEl = document.getElementById("filter");
-  var statusFilterEl = document.getElementById("status-filter");
-  var sortFilterEl = document.getElementById("sort-filter");
-  var listEl = document.getElementById("request-list");
-  var editingId = null;
-
-  function stopEditing() {
-    editingId = null;
-    cancelEditBtn.hidden = true;
-    submitBtn.textContent = "Złóż zgłoszenie";
-    nicknameEl.value = "";
-    selectEl.value = "";
-    detailBox.hidden = true;
-    runeField.hidden = true;
-    runeEl.required = false;
-    runeEl.value = "";
-    formStatus.textContent = "";
-    try {
-      var savedNick = localStorage.getItem("tattooGuildNick");
-      if (savedNick) nicknameEl.value = savedNick;
-    } catch (e) {}
-  }
-
-  cancelEditBtn.addEventListener("click", stopEditing);
-
-  function startEditing(d) {
-    var idx = FLAT.findIndex(function (it) { return it.name === d.name && it.cls === d.cls; });
-    if (idx === -1) return;
-    editingId = d.id;
-    nicknameEl.value = d.nickname || "";
-    selectEl.value = String(idx);
-    selectEl.dispatchEvent(new Event("change"));
-    if (d.rune) runeEl.value = d.rune;
-    cancelEditBtn.hidden = false;
-    submitBtn.textContent = "Zapisz zmiany";
-    formStatus.textContent = "";
-    window.scrollTo({ top: 0, behavior: "smooth" });
-  }
-
-  try {
-    var savedNick = localStorage.getItem("tattooGuildNick");
-    if (savedNick) nicknameEl.value = savedNick;
-  } catch (e) {}
-
   function timeAgo(ts) {
     var diffMin = Math.max(0, Math.floor((Date.now() - ts) / 60000));
     if (diffMin < 1) return "przed chwilą";
@@ -639,25 +340,18 @@
     return Math.floor(diffH / 24) + " dni temu";
   }
 
+  var filterEl = document.getElementById("filter");
+  var sortFilterEl = document.getElementById("sort-filter");
+  var listAddEl = document.getElementById("list-add");
+  var listSearchEl = document.getElementById("list-search");
+
   var allDocs = [];
 
-  function renderList() {
-    var query = filterEl.value.trim().toLowerCase();
-    var mine = nicknameEl.value.trim().toLowerCase();
-    var status = statusFilterEl.value;
-    listEl.textContent = "";
-
-    var filtered = allDocs.filter(function (d) {
-      if (status === "open" && d.closed) return false;
-      if (status === "closed" && !d.closed) return false;
-      if (!query) return true;
-      return (d.nickname || "").toLowerCase().indexOf(query) !== -1 ||
-             (d.name || "").toLowerCase().indexOf(query) !== -1;
-    });
-
+  function sortDocs(docs) {
     var sortBy = sortFilterEl.value;
-    filtered.sort(function (a, b) {
-      if (sortBy === "nick") return (a.nickname || "").localeCompare(b.nickname || "", "pl");
+    var sorted = docs.slice();
+    sorted.sort(function (a, b) {
+      if (sortBy === "user") return (a.discordUsername || "").localeCompare(b.discordUsername || "", "pl");
       if (sortBy === "name") return (a.name || "").localeCompare(b.name || "", "pl");
       if (sortBy === "rune") {
         var ai = RUNE_COLORS.indexOf(runeInfoFor(a));
@@ -669,51 +363,63 @@
       }
       return (b.ts || 0) - (a.ts || 0);
     });
+    return sorted;
+  }
+
+  function renderSection(type, containerEl, emptyAllText, emptyFilteredText) {
+    var query = filterEl.value.trim().toLowerCase();
+    containerEl.textContent = "";
+
+    var docsOfType = allDocs.filter(function (d) { return d.type === type; });
+    var filtered = docsOfType.filter(function (d) {
+      if (!query) return true;
+      return (d.discordUsername || "").toLowerCase().indexOf(query) !== -1 ||
+             (d.name || "").toLowerCase().indexOf(query) !== -1;
+    });
+    filtered = sortDocs(filtered);
 
     if (filtered.length === 0) {
       var empty = document.createElement("p");
       empty.className = "empty-state";
-      empty.textContent = allDocs.length === 0 ? "Brak zgłoszeń — bądź pierwszy." : "Brak wyników dla tego filtra.";
-      listEl.appendChild(empty);
+      empty.textContent = docsOfType.length === 0 ? emptyAllText : emptyFilteredText;
+      containerEl.appendChild(empty);
       return;
     }
 
     filtered.forEach(function (d) {
       var row = document.createElement("div");
-      row.className = "request-row";
-      if (mine && (d.nickname || "").toLowerCase() === mine) row.dataset.mine = "true";
-      if (d.closed) row.dataset.closed = "true";
-      var rowRuneInfo = runeInfoFor(d);
-      if (rowRuneInfo) row.style.setProperty("--row-accent", rowRuneInfo.swatch);
+      row.className = "listing-row";
+      var runeInfo = runeInfoFor(d);
+      if (runeInfo) row.style.setProperty("--row-accent", runeInfo.swatch);
 
       var top = document.createElement("div");
-      top.className = "request-row-top";
+      top.className = "listing-row-top";
 
-      var nick = document.createElement("span");
-      nick.className = "request-nick";
-      nick.textContent = d.nickname || "?";
-      top.appendChild(nick);
+      var user = document.createElement("span");
+      user.className = "listing-user";
+      user.textContent = d.discordUsername || "?";
+      top.appendChild(user);
 
       var name = document.createElement("span");
-      name.className = "request-name";
+      name.className = "listing-name";
       name.textContent = d.name || "";
       top.appendChild(name);
 
       if (d.runeLabel) {
         var rune = document.createElement("span");
-        rune.className = "request-rune";
-        rune.style.setProperty("--rune-swatch", rowRuneInfo ? rowRuneInfo.swatch : "var(--border)");
+        rune.className = "listing-rune";
+        rune.style.setProperty("--rune-swatch", runeInfo ? runeInfo.swatch : "var(--border)");
         rune.textContent = d.runeLabel;
         top.appendChild(rune);
       }
 
       var tag = document.createElement("span");
-      tag.className = "request-tag";
+      tag.className = "listing-tag";
       tag.textContent = d.cls || "";
       top.appendChild(tag);
 
       var time = document.createElement("span");
-      time.className = "request-time";
+      time.className = "listing-time";
       time.textContent = typeof d.ts === "number" ? timeAgo(d.ts) : "";
       top.appendChild(time);
 
@@ -721,202 +427,53 @@
 
       if (d.desc) {
         var desc = document.createElement("p");
-        desc.className = "request-desc";
+        desc.className = "listing-desc";
         desc.textContent = d.desc;
         row.appendChild(desc);
       }
 
-      if (d.closed) {
-        var badge = document.createElement("p");
-        badge.className = "closed-badge";
-        badge.textContent = "✓ Zamknięte — pomógł/pomogła: " + (d.helperNick || "?");
-        row.appendChild(badge);
-      }
-
-      var actions = document.createElement("div");
-      actions.className = "request-actions";
-
-      var editBtn = document.createElement("button");
-      editBtn.type = "button";
-      editBtn.className = "action-btn";
-      editBtn.textContent = "Edytuj";
-      editBtn.addEventListener("click", function () { startEditing(d); });
-      actions.appendChild(editBtn);
-
-      if (!d.closed) {
-        var closeBtn = document.createElement("button");
-        closeBtn.type = "button";
-        closeBtn.className = "action-btn";
-        closeBtn.textContent = "Zamknij";
-        closeBtn.addEventListener("click", function () {
-          var helperNick = window.prompt("Nick postaci, która pomogła:");
-          if (helperNick === null) return;
-          helperNick = helperNick.trim();
-          if (!helperNick) return;
-          dbRef.collection("requests").doc(d.id).update({
-            closed: true,
-            helperNick: helperNick.slice(0, 24)
-          }).catch(function (err) {
-            window.alert("Nie udało się zamknąć zgłoszenia (" + err.code + ").");
-          });
-        });
-        actions.appendChild(closeBtn);
-      }
-
-      var deleteBtn = document.createElement("button");
-      deleteBtn.type = "button";
-      deleteBtn.className = "action-btn danger";
-      deleteBtn.textContent = "Usuń";
-      deleteBtn.addEventListener("click", function () {
-        if (!window.confirm("Usunąć zgłoszenie \"" + d.name + "\" (" + d.nickname + ")?")) return;
-        dbRef.collection("requests").doc(d.id).delete().then(function () {
-          if (editingId === d.id) stopEditing();
-        }).catch(function (err) {
-          window.alert("Nie udało się usunąć zgłoszenia (" + err.code + ").");
-        });
-      });
-      actions.appendChild(deleteBtn);
-
-      row.appendChild(actions);
-
-      listEl.appendChild(row);
+      containerEl.appendChild(row);
     });
   }
 
-  filterEl.addEventListener("input", renderList);
-  nicknameEl.addEventListener("input", renderList);
-  statusFilterEl.addEventListener("change", renderList);
-  sortFilterEl.addEventListener("change", renderList);
-
-  function notifyDiscord(entry) {
-    if (!notifyDiscordUrl) return;
-    fetch(notifyDiscordUrl, {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({
-        nickname: entry.nickname,
-        name: entry.name,
-        cls: entry.cls,
-        desc: entry.desc,
-        runeLabel: entry.runeLabel
-      })
-    }).catch(function () {
-      // Powiadomienie na Discord jest opcjonalne — brak dostawy nie blokuje zgłoszenia.
-    });
+  function renderBoard() {
+    renderSection("add", listAddEl, "Brak dostępnych tatuaży — nikt jeszcze nic nie zgłosił.", "Brak wyników dla tego filtra.");
+    renderSection("search", listSearchEl, "Nikt jeszcze niczego nie szuka.", "Brak wyników dla tego filtra.");
   }
 
-  var dbRef = null;
+  filterEl.addEventListener("input", renderBoard);
+  sortFilterEl.addEventListener("change", renderBoard);
+
   var isConfigured = firebaseConfig.apiKey.indexOf("TWOJ_") !== 0;
 
   if (!isConfigured) {
-    listEl.textContent = "";
-    var setupMsg = document.createElement("p");
-    setupMsg.className = "empty-state";
-    setupMsg.textContent = "Strona nie jest jeszcze podłączona do bazy danych — uzupełnij sekcję KONFIGURACJA FIREBASE w index.html (patrz README).";
-    listEl.appendChild(setupMsg);
-    submitBtn.disabled = true;
-    formStatus.textContent = "Zgłoszenia będą działać po skonfigurowaniu Firebase.";
-    formStatus.dataset.tone = "error";
+    [listAddEl, listSearchEl].forEach(function (el) {
+      el.textContent = "";
+      var setupMsg = document.createElement("p");
+      setupMsg.className = "empty-state";
+      setupMsg.textContent = "Strona nie jest jeszcze podłączona do bazy danych — uzupełnij sekcję KONFIGURACJA FIREBASE w index.html (patrz README).";
+      el.appendChild(setupMsg);
+    });
   } else {
     firebase.initializeApp(firebaseConfig);
-    dbRef = firebase.firestore();
+    var dbRef = firebase.firestore();
 
-    dbRef.collection("requests").orderBy("ts", "desc").limit(200).onSnapshot(
+    dbRef.collection("listings").orderBy("ts", "desc").limit(300).onSnapshot(
       function (snap) {
-        allDocs = snap.docs.map(function (doc) {
-          var data = doc.data();
-          data.id = doc.id;
-          return data;
-        });
-        renderList();
+        allDocs = snap.docs.map(function (doc) { return doc.data(); });
+        renderBoard();
       },
       function (err) {
-        listEl.textContent = "";
-        var errMsg = document.createElement("p");
-        errMsg.className = "empty-state";
-        errMsg.textContent = "Nie udało się wczytać zgłoszeń (" + err.code + ").";
-        listEl.appendChild(errMsg);
+        [listAddEl, listSearchEl].forEach(function (el) {
+          el.textContent = "";
+          var errMsg = document.createElement("p");
+          errMsg.className = "empty-state";
+          errMsg.textContent = "Nie udało się wczytać ogłoszeń (" + err.code + ").";
+          el.appendChild(errMsg);
+        });
       }
     );
   }
-
-  document.getElementById("request-form").addEventListener("submit", function (e) {
-    e.preventDefault();
-    var nickname = nicknameEl.value.trim();
-    var idx = selectEl.value;
-
-    if (!nickname) {
-      formStatus.textContent = "Podaj nick swojej postaci.";
-      formStatus.dataset.tone = "error";
-      return;
-    }
-    if (idx === "") {
-      formStatus.textContent = "Wybierz tatuaż z listy.";
-      formStatus.dataset.tone = "error";
-      return;
-    }
-
-    var item = FLAT[Number(idx)];
-    var rune = RUNE_COLORS.filter(function (r) { return r.key === runeEl.value; })[0];
-    if (!rune) {
-      formStatus.textContent = "Wybierz kolor runy dla tego tatuażu.";
-      formStatus.dataset.tone = "error";
-      return;
-    }
-
-    if (!dbRef) {
-      formStatus.textContent = "Zgłoszenia są chwilowo niedostępne — odśwież stronę.";
-      formStatus.dataset.tone = "error";
-      return;
-    }
-
-    submitBtn.disabled = true;
-    formStatus.textContent = "Wysyłanie…";
-    formStatus.dataset.tone = "";
-
-    try { localStorage.setItem("tattooGuildNick", nickname); } catch (e) {}
-
-    var entry = {
-      nickname: nickname,
-      name: item.name,
-      cls: item.cls,
-      desc: item.desc,
-      rune: rune.key,
-      runeLabel: rune.label
-    };
-
-    if (editingId) {
-      dbRef.collection("requests").doc(editingId).update(entry).then(function () {
-        submitBtn.disabled = false;
-        stopEditing();
-        formStatus.textContent = "Zgłoszenie zaktualizowane.";
-        formStatus.dataset.tone = "ok";
-      }).catch(function (err) {
-        formStatus.textContent = "Błąd zapisu (" + err.code + "). Spróbuj ponownie.";
-        formStatus.dataset.tone = "error";
-        submitBtn.disabled = false;
-      });
-      return;
-    }
-
-    entry.ts = Date.now();
-
-    dbRef.collection("requests").add(entry).then(function () {
-      formStatus.textContent = "Zgłoszenie wysłane.";
-      formStatus.dataset.tone = "ok";
-      selectEl.value = "";
-      detailBox.hidden = true;
-      runeField.hidden = true;
-      runeEl.required = false;
-      runeEl.value = "";
-      submitBtn.disabled = false;
-      notifyDiscord(entry);
-    }).catch(function (err) {
-      formStatus.textContent = "Błąd wysyłki (" + err.code + "). Spróbuj ponownie.";
-      formStatus.dataset.tone = "error";
-      submitBtn.disabled = false;
-    });
-  });
 })();
 </script>
 </body>

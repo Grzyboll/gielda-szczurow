@@ -1,5 +1,5 @@
 // Jednorazowy (albo uruchamiany po każdej zmianie definicji komendy) skrypt
-// rejestrujący komendę slash /tatuaz w Discordzie. NIE jest częścią wdrażanej
+// rejestrujący komendę slash /tattoo w Discordzie. NIE jest częścią wdrażanej
 // funkcji (nie jest exportowany z index.js) — uruchamiasz go ręcznie lokalnie:
 //
 //   DISCORD_APPLICATION_ID=... DISCORD_BOT_TOKEN=... node register-commands.js
@@ -16,29 +16,54 @@ if (!applicationId || !botToken) {
 
 const { RUNE_COLORS } = require("./tattoos");
 
+const runeChoices = RUNE_COLORS.map((r) => ({ name: r.label, value: r.key }));
+
+const addSearchOptions = [
+  {
+    name: "runa",
+    description: "Kolor runy",
+    type: 3, // STRING
+    required: true,
+    choices: runeChoices
+  },
+  {
+    name: "tatuaz",
+    description: "Zacznij pisać nazwę tatuażu / bonusu klasowego i wybierz z podpowiedzi",
+    type: 3,
+    required: true,
+    autocomplete: true
+  }
+];
+
 const command = {
-  name: "tatuaz",
-  description: "Zgłoś prośbę o tatuaż do kowala run",
+  name: "tattoo",
+  description: "Giełda tatuaży gildii — dodaj, poszukaj albo usuń swoje ogłoszenie",
   options: [
     {
-      name: "nick",
-      description: "Nick Twojej postaci",
-      type: 3, // STRING
-      required: true
+      name: "add",
+      description: "Dodaj tatuaż, który masz i chcesz oddać",
+      type: 1, // SUB_COMMAND
+      options: addSearchOptions
     },
     {
-      name: "bonus",
-      description: "Zacznij pisać nazwę tatuażu / bonusu klasowego i wybierz z podpowiedzi",
-      type: 3,
-      required: true,
-      autocomplete: true
+      name: "search",
+      description: "Dodaj tatuaż, którego szukasz",
+      type: 1,
+      options: addSearchOptions
     },
     {
-      name: "runa",
-      description: "Kolor runy",
-      type: 3,
-      required: true,
-      choices: RUNE_COLORS.map((r) => ({ name: r.label, value: r.key }))
+      name: "remove",
+      description: "Usuń jedno ze swoich ogłoszeń",
+      type: 1,
+      options: [
+        {
+          name: "wpis",
+          description: "Wybierz swoje ogłoszenie do usunięcia",
+          type: 3,
+          required: true,
+          autocomplete: true
+        }
+      ]
     }
   ]
 };
