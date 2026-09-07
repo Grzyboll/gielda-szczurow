@@ -1,0 +1,25 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    match /requests/{requestId} {
+      allow read: if true;
+      allow create: if request.resource.data.keys().hasOnly(['nickname', 'name', 'cls', 'desc', 'color', 'rune', 'runeLabel', 'ts'])
+                    && request.resource.data.nickname is string
+                    && request.resource.data.nickname.size() > 0
+                    && request.resource.data.nickname.size() <= 24
+                    && request.resource.data.name is string
+                    && request.resource.data.ts is number;
+      allow update: if request.resource.data.diff(resource.data).affectedKeys()
+                          .hasOnly(['nickname', 'name', 'cls', 'desc', 'color', 'rune', 'runeLabel', 'closed', 'helperNick'])
+                    && request.resource.data.nickname is string
+                    && request.resource.data.nickname.size() > 0
+                    && request.resource.data.nickname.size() <= 24
+                    && request.resource.data.name is string
+                    && request.resource.data.ts is number
+                    && (!('closed' in request.resource.data) || request.resource.data.closed is bool)
+                    && (!('helperNick' in request.resource.data)
+                        || (request.resource.data.helperNick is string && request.resource.data.helperNick.size() <= 24));
+      allow delete: if true;
+    }
+  }
+}
