@@ -20,15 +20,9 @@ const runeChoices = RUNE_COLORS.map((r) => ({ name: r.label, value: r.key }));
 
 const addSearchOptions = [
   {
-    name: "nick",
-    description: "Nick Twojej postaci",
-    type: 3, // STRING
-    required: true
-  },
-  {
     name: "runa",
     description: "Kolor runy",
-    type: 3,
+    type: 3, // STRING
     required: true,
     choices: runeChoices
   },
@@ -43,17 +37,17 @@ const addSearchOptions = [
 
 const command = {
   name: "tattoo",
-  description: "Giełda tatuaży gildii — dodaj, poszukaj albo usuń swoje ogłoszenie",
+  description: "Giełda tatuaży gildii — dodaj, poszukaj, usuń swoje ogłoszenie albo zobacz ranking",
   options: [
     {
       name: "add",
-      description: "Dodaj tatuaż, który masz i chcesz oddać",
+      description: "Dodaj tatuaż, który masz i chcesz oddać (nick brany automatycznie z Discorda)",
       type: 1, // SUB_COMMAND
       options: addSearchOptions
     },
     {
       name: "search",
-      description: "Dodaj tatuaż, którego szukasz",
+      description: "Dodaj tatuaż, którego szukasz (nick brany automatycznie z Discorda)",
       type: 1,
       options: addSearchOptions
     },
@@ -68,8 +62,20 @@ const command = {
           type: 3,
           required: true,
           autocomplete: true
+        },
+        {
+          name: "pomogl",
+          description: "Usuwasz poszukiwanie bo znalazłeś? Zaznacz kto pomógł — dostanie +5 pkt",
+          type: 6, // USER
+          required: false
         }
       ]
+    },
+    {
+      name: "ranking",
+      description: "Pokaż ranking gildii (kto zdobył najwięcej punktów)",
+      type: 1,
+      options: []
     }
   ]
 };

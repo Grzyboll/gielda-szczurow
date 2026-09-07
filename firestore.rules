@@ -8,5 +8,12 @@ service cloud.firestore {
       allow read: if true;
       allow write: if false;
     }
+
+    // Ranking punktowy (za dodane ogłoszenia i za pomoc w znalezieniu
+    // tatuażu) — też wyłącznie zapisywany przez discordInteractions.
+    match /rankings/{userId} {
+      allow read: if true;
+      allow write: if false;
+    }
   }
 }

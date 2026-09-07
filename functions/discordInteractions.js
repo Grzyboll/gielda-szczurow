@@ -36,13 +36,26 @@ function verifySignature(req, publicKeyHex) {
   }
 }
 
+// Nick brany automatycznie z Discorda: nick serwerowy (member.nick) jeśli
+// gracz go ustawił, inaczej globalna nazwa/username — nigdy nie pytamy o to
+// ręcznie.
 function getDiscordUser(interaction) {
-  const user = (interaction.member && interaction.member.user) || interaction.user || {};
+  const member = interaction.member;
+  const user = (member && member.user) || interaction.user || {};
+  const serverNick = member && member.nick;
   return {
     id: user.id || "",
     mention: user.id ? "<@" + user.id + ">" : "",
-    displayName: user.global_name || user.username || "Nieznany gracz"
+    displayName: serverNick || user.global_name || user.username || "Nieznany gracz"
   };
+}
+
+function resolveMentionedUser(interaction, userId) {
+  const resolved = (interaction.data && interaction.data.resolved) || {};
+  const member = resolved.members && resolved.members[userId];
+  const user = resolved.users && resolved.users[userId];
+  const displayName = (member && member.nick) || (user && (user.global_name || user.username)) || "Nieznany gracz";
+  return { id: userId, displayName };
 }
 
 function getSubcommand(interaction) {
@@ -82,6 +95,19 @@ async function findMatches(oppositeType, name, runeKey) {
   return snap.docs
     .map((d) => d.data())
     .filter((d) => d.name === name && d.rune === runeKey);
+}
+
+async function awardPoints(discordUserId, discordUsername, points) {
+  if (!discordUserId || !points) return;
+  const ref = admin.firestore().collection("rankings").doc(discordUserId);
+  await ref.set(
+    {
+      discordUserId,
+      discordUsername,
+      points: admin.firestore.FieldValue.increment(points)
+    },
+    { merge: true }
+  );
 }
 
 async function handleAutocomplete(interaction, res) {
@@ -131,16 +157,15 @@ async function handleAutocomplete(interaction, res) {
 }
 
 async function handleAddOrSearch(sub, user, res) {
-  const nickname = String(sub.opts.nick || "").trim().slice(0, 24);
   const tattooName = String(sub.opts.tatuaz || "").trim();
   const item = FLAT.find((it) => it.name === tattooName);
   const rune = RUNE_COLORS.find((r) => r.key === sub.opts.runa);
 
-  if (!nickname || !item || !rune) {
+  if (!item || !rune) {
     res.json({
       type: InteractionResponseType.CHANNEL_MESSAGE_WITH_SOURCE,
       data: {
-        content: "Podaj nick postaci i wybierz tatuaż z podpowiedzi (autouzupełnianie), a nie wpisuj go ręcznie.",
+        content: "Wybierz tatuaż z podpowiedzi (autouzupełnianie), a nie wpisuj go ręcznie.",
         flags: EPHEMERAL
       }
     });
@@ -150,7 +175,6 @@ async function handleAddOrSearch(sub, user, res) {
   const listing = {
     discordUserId: user.id,
     discordUsername: user.displayName,
-    nickname,
     name: item.name,
     cls: item.cls,
     desc: item.desc,
@@ -161,17 +185,18 @@ async function handleAddOrSearch(sub, user, res) {
   };
 
   await admin.firestore().collection("listings").add(listing);
+  await awardPoints(user.id, user.displayName, 1);
 
   const isAdd = sub.name === "add";
   const verb = isAdd ? "ma do oddania tatuaż" : "szuka tatuażu";
   const headline =
-    "**" + nickname + "** (" + user.mention + ") " + verb + ": **" + item.name + "** [" + rune.label + "] (" + item.cls + ")\n> " + item.desc;
+    "**" + user.displayName + "** " + verb + ": **" + item.name + "** [" + rune.label + "] (" + item.cls + ")\n> " + item.desc;
 
   const matches = await findMatches(isAdd ? "search" : "add", item.name, rune.key);
   var matchNote = "";
   if (matches.length > 0) {
     const names = matches
-      .map((m) => m.nickname + " (" + (m.discordUserId ? "<@" + m.discordUserId + ">" : m.discordUsername) + ")")
+      .map((m) => m.discordUsername + (m.discordUserId ? " (<@" + m.discordUserId + ">)" : ""))
       .join(", ");
     matchNote = isAdd
       ? "\n\n🔔 Ktoś już tego szuka: " + names
@@ -187,7 +212,7 @@ async function handleAddOrSearch(sub, user, res) {
   });
 }
 
-async function handleRemove(sub, user, res) {
+async function handleRemove(sub, user, interaction, res) {
   const docId = String(sub.opts.wpis || "").trim();
   if (!docId) {
     res.json({
@@ -211,12 +236,57 @@ async function handleRemove(sub, user, res) {
   const data = doc.data();
   await docRef.delete();
 
+  var bonusNote = "";
+  const helperId = sub.opts.pomogl;
+
+  if (helperId) {
+    if (data.type !== "search") {
+      bonusNote = "\n(Bonus +5 pkt działa tylko przy usuwaniu poszukiwań — pominięto.)";
+    } else if (helperId === user.id) {
+      bonusNote = "\n(Nie można przyznać punktów samemu sobie.)";
+    } else {
+      const helper = resolveMentionedUser(interaction, helperId);
+      await awardPoints(helperId, helper.displayName, 5);
+      bonusNote = "\n+5 pkt dla <@" + helperId + "> — dzięki!";
+      await sendWebhook(
+        "🏆 <@" + helperId + "> dostaje +5 pkt — pomógł/pomogła **" + user.displayName + "** zdobyć **" + data.name + "** [" + data.runeLabel + "]!"
+      );
+    }
+  }
+
   res.json({
     type: InteractionResponseType.CHANNEL_MESSAGE_WITH_SOURCE,
     data: {
-      content: "Usunięto ogłoszenie: **" + data.name + "** [" + data.runeLabel + "]",
+      content: "Usunięto ogłoszenie: **" + data.name + "** [" + data.runeLabel + "]" + bonusNote,
       flags: EPHEMERAL
     }
+  });
+}
+
+async function handleRanking(res) {
+  const snap = await admin.firestore()
+    .collection("rankings")
+    .orderBy("points", "desc")
+    .limit(10)
+    .get();
+
+  if (snap.empty) {
+    res.json({
+      type: InteractionResponseType.CHANNEL_MESSAGE_WITH_SOURCE,
+      data: { content: "Ranking jest jeszcze pusty." }
+    });
+    return;
+  }
+
+  const medals = ["🥇", "🥈", "🥉"];
+  const lines = snap.docs.map((d, i) => {
+    const data = d.data();
+    return (medals[i] || i + 1 + ".") + " **" + data.discordUsername + "** — " + data.points + " pkt";
+  });
+
+  res.json({
+    type: InteractionResponseType.CHANNEL_MESSAGE_WITH_SOURCE,
+    data: { content: "**Ranking gildii**\n" + lines.join("\n") }
   });
 }
 
@@ -230,7 +300,12 @@ async function handleCommand(interaction, res) {
   }
 
   if (sub.name === "remove") {
-    await handleRemove(sub, user, res);
+    await handleRemove(sub, user, interaction, res);
+    return;
+  }
+
+  if (sub.name === "ranking") {
+    await handleRanking(res);
     return;
   }
 

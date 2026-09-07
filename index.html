@@ -174,6 +174,46 @@
     gap: 10px;
   }
 
+  .ranking-list {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    margin: 0;
+    padding: 0;
+    list-style: none;
+  }
+
+  .ranking-row {
+    display: flex;
+    align-items: baseline;
+    gap: 10px;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 4px;
+    padding: 10px 16px;
+  }
+
+  .ranking-medal {
+    font-family: var(--font-mono);
+    font-weight: 700;
+    font-size: 13px;
+    color: var(--text-dim);
+    min-width: 1.6em;
+  }
+
+  .ranking-user {
+    font-family: var(--font-mono);
+    font-weight: 700;
+    font-size: 14px;
+    flex: 1;
+  }
+
+  .ranking-points {
+    font-family: var(--font-mono);
+    font-size: 13px;
+    color: var(--accent);
+  }
+
   .empty-state {
     color: var(--text-dim);
     font-size: 14px;
@@ -255,12 +295,6 @@
     color: var(--text-dim);
   }
 
-  .listing-contact {
-    margin: 0;
-    font-family: var(--font-mono);
-    font-size: 11px;
-    color: var(--text-dim);
-  }
 
   @media (max-width: 480px) {
     .listing-time { margin-left: 0; }
@@ -308,6 +342,15 @@
       </div>
     </div>
   </section>
+
+  <section class="board">
+    <div class="board-head">
+      <h2>Ranking gildii</h2>
+    </div>
+    <ol id="ranking-list" class="ranking-list">
+      <li class="empty-state">Wczytywanie…</li>
+    </ol>
+  </section>
 </div>
 
 <script src="https://www.gstatic.com/firebasejs/10.13.2/firebase-app-compat.js"></script>
@@ -351,6 +394,7 @@
   var sortFilterEl = document.getElementById("sort-filter");
   var listAddEl = document.getElementById("list-add");
   var listSearchEl = document.getElementById("list-search");
+  var rankingListEl = document.getElementById("ranking-list");
 
   var allDocs = [];
 
@@ -358,7 +402,7 @@
     var sortBy = sortFilterEl.value;
     var sorted = docs.slice();
     sorted.sort(function (a, b) {
-      if (sortBy === "user") return (a.nickname || "").localeCompare(b.nickname || "", "pl");
+      if (sortBy === "user") return (a.discordUsername || "").localeCompare(b.discordUsername || "", "pl");
       if (sortBy === "name") return (a.name || "").localeCompare(b.name || "", "pl");
       if (sortBy === "rune") {
         var ai = RUNE_COLORS.indexOf(runeInfoFor(a));
@@ -380,8 +424,7 @@
     var docsOfType = allDocs.filter(function (d) { return d.type === type; });
     var filtered = docsOfType.filter(function (d) {
       if (!query) return true;
-      return (d.nickname || "").toLowerCase().indexOf(query) !== -1 ||
-             (d.discordUsername || "").toLowerCase().indexOf(query) !== -1 ||
+      return (d.discordUsername || "").toLowerCase().indexOf(query) !== -1 ||
              (d.name || "").toLowerCase().indexOf(query) !== -1;
     });
     filtered = sortDocs(filtered);
@@ -405,7 +448,7 @@
 
       var user = document.createElement("span");
       user.className = "listing-user";
-      user.textContent = d.nickname || "?";
+      user.textContent = d.discordUsername || "?";
       top.appendChild(user);
 
       var name = document.createElement("span");
@@ -440,13 +483,6 @@
         row.appendChild(desc);
       }
 
-      if (d.discordUsername) {
-        var contact = document.createElement("p");
-        contact.className = "listing-contact";
-        contact.textContent = "Kontakt (Discord): " + d.discordUsername;
-        row.appendChild(contact);
-      }
-
       containerEl.appendChild(row);
     });
   }
@@ -454,6 +490,42 @@
   function renderBoard() {
     renderSection("add", listAddEl, "Brak dostępnych tatuaży — nikt jeszcze nic nie zgłosił.", "Brak wyników dla tego filtra.");
     renderSection("search", listSearchEl, "Nikt jeszcze niczego nie szuka.", "Brak wyników dla tego filtra.");
+  }
+
+  var MEDALS = ["🥇", "🥈", "🥉"];
+
+  function renderRanking(docs) {
+    rankingListEl.textContent = "";
+
+    if (docs.length === 0) {
+      var empty = document.createElement("li");
+      empty.className = "empty-state";
+      empty.textContent = "Ranking jest jeszcze pusty.";
+      rankingListEl.appendChild(empty);
+      return;
+    }
+
+    docs.forEach(function (d, i) {
+      var row = document.createElement("li");
+      row.className = "ranking-row";
+
+      var medal = document.createElement("span");
+      medal.className = "ranking-medal";
+      medal.textContent = MEDALS[i] || (i + 1) + ".";
+      row.appendChild(medal);
+
+      var user = document.createElement("span");
+      user.className = "ranking-user";
+      user.textContent = d.discordUsername || "?";
+      row.appendChild(user);
+
+      var points = document.createElement("span");
+      points.className = "ranking-points";
+      points.textContent = (d.points || 0) + " pkt";
+      row.appendChild(points);
+
+      rankingListEl.appendChild(row);
+    });
   }
 
   filterEl.addEventListener("input", renderBoard);
@@ -469,6 +541,11 @@
       setupMsg.textContent = "Strona nie jest jeszcze podłączona do bazy danych — uzupełnij sekcję KONFIGURACJA FIREBASE w index.html (patrz README).";
       el.appendChild(setupMsg);
     });
+    rankingListEl.textContent = "";
+    var rankingSetupMsg = document.createElement("li");
+    rankingSetupMsg.className = "empty-state";
+    rankingSetupMsg.textContent = "Strona nie jest jeszcze podłączona do bazy danych.";
+    rankingListEl.appendChild(rankingSetupMsg);
   } else {
     firebase.initializeApp(firebaseConfig);
     var dbRef = firebase.firestore();
@@ -486,6 +563,19 @@
           errMsg.textContent = "Nie udało się wczytać ogłoszeń (" + err.code + ").";
           el.appendChild(errMsg);
         });
+      }
+    );
+
+    dbRef.collection("rankings").orderBy("points", "desc").limit(10).onSnapshot(
+      function (snap) {
+        renderRanking(snap.docs.map(function (doc) { return doc.data(); }));
+      },
+      function (err) {
+        rankingListEl.textContent = "";
+        var errMsg = document.createElement("li");
+        errMsg.className = "empty-state";
+        errMsg.textContent = "Nie udało się wczytać rankingu (" + err.code + ").";
+        rankingListEl.appendChild(errMsg);
       }
     );
   }
