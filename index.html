@@ -65,7 +65,7 @@
   }
 
   .page {
-    max-width: 720px;
+    max-width: 1080px;
     margin: 0 auto;
     padding: 48px 24px 96px;
     display: flex;
@@ -325,6 +325,126 @@
     color: var(--text-dim);
   }
 
+  .panel-intro {
+    font-size: 14px;
+    color: var(--text-dim);
+    margin: 0 0 4px;
+    max-width: 70ch;
+  }
+
+  .rune-legend {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px 20px;
+    margin-bottom: 8px;
+  }
+
+  .rune-legend-item {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    font-family: var(--font-mono);
+    font-size: 12px;
+    color: var(--text-dim);
+  }
+
+  .rune-legend-dot {
+    width: 10px;
+    height: 10px;
+    border-radius: 50%;
+    border: 1px solid var(--border);
+    flex-shrink: 0;
+  }
+
+  .catalog-group {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    margin-bottom: 22px;
+  }
+
+  .catalog-group h4 {
+    font-family: var(--font-mono);
+    font-size: 13px;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    color: var(--accent);
+    margin: 0;
+  }
+
+  .catalog-item {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 4px;
+    padding: 10px 14px;
+  }
+
+  .catalog-item-name {
+    font-family: var(--font-mono);
+    font-weight: 700;
+    font-size: 14px;
+  }
+
+  .catalog-item-desc {
+    margin: 4px 0 0;
+    font-size: 13px;
+    color: var(--text-dim);
+  }
+
+  .help-content h3 {
+    font-family: var(--font-display);
+    font-size: 18px;
+    margin: 0 0 4px;
+  }
+
+  .help-content h4 {
+    font-family: var(--font-mono);
+    font-size: 13px;
+    letter-spacing: 0.03em;
+    color: var(--accent);
+    margin: 20px 0 4px;
+  }
+
+  .help-content h4:first-of-type { margin-top: 6px; }
+
+  .help-content p { font-size: 14px; margin: 4px 0; }
+
+  .help-content pre {
+    font-family: var(--font-mono);
+    font-size: 13px;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 4px;
+    padding: 10px 14px;
+    margin: 6px 0;
+    overflow-x: auto;
+  }
+
+  .help-note {
+    color: var(--text-dim);
+    font-size: 13px !important;
+  }
+
+  .help-content ul {
+    margin: 4px 0;
+    padding-left: 20px;
+    font-size: 14px;
+  }
+
+  .help-content code {
+    font-family: var(--font-mono);
+    font-size: 0.92em;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 3px;
+    padding: 1px 5px;
+  }
+
+  .help-content pre code {
+    background: none;
+    border: none;
+    padding: 0;
+  }
 
   @media (max-width: 480px) {
     .listing-time { margin-left: 0; }
@@ -353,6 +473,8 @@
       <button type="button" class="tab-btn" data-tab="add" role="tab" aria-selected="true">Dostępne</button>
       <button type="button" class="tab-btn" data-tab="search" role="tab" aria-selected="false">Poszukiwane</button>
       <button type="button" class="tab-btn" data-tab="ranking" role="tab" aria-selected="false">Ranking gildii</button>
+      <button type="button" class="tab-btn" data-tab="katalog" role="tab" aria-selected="false">Katalog tatuaży</button>
+      <button type="button" class="tab-btn" data-tab="pomoc" role="tab" aria-selected="false">Pomoc</button>
     </div>
 
     <div class="board-filters" id="listing-filters">
@@ -382,6 +504,47 @@
         <li class="empty-state">Wczytywanie…</li>
       </ol>
     </div>
+
+    <div class="board-section" data-panel="katalog" hidden>
+      <p class="panel-intro">Pełna lista tatuaży możliwych do zamówienia u kowala run. <strong>Każdy</strong> z poniższych tatuaży możesz dostać w dowolnej z tych 4 run:</p>
+      <div id="rune-legend" class="rune-legend"></div>
+      <div id="catalog-groups"></div>
+    </div>
+
+    <div class="board-section" data-panel="pomoc" hidden>
+      <div class="help-content">
+        <h3>Jak korzystać z giełdy</h3>
+        <p class="panel-intro">Ta strona tylko pokazuje ogłoszenia — wszystko dodajesz, szukasz i usuwasz komendami bota na Discordzie (na dowolnym kanale, gdzie jest dodany bot). Zacznij pisać <code>/tattoo</code>, a Discord podpowie Ci dalsze pola.</p>
+
+        <h4><code>/tattoo add</code> — oddajesz tatuaż, który masz</h4>
+        <p>Pola: <code>runa</code> (wybierz z listy) i <code>tatuaz</code> (zacznij pisać, wybierz z podpowiedzi). Nick brany jest automatycznie z Discorda.</p>
+        <pre>/tattoo add runa:Zniszczenie (czerwona) tatuaz:mistrz parowania</pre>
+        <p class="help-note">Efekt: ogłoszenie trafia na listę "Dostępne", leci na kanał ogłoszeń (webhook), a Ty dostajesz <strong>+1 pkt</strong> do rankingu. Jeśli ktoś już szuka dokładnie tego tatuażu w tej samej runie — bot od razu Ci go wskaże (z oznaczeniem @), żebyś mógł się odezwać.</p>
+
+        <h4><code>/tattoo search</code> — szukasz tatuażu</h4>
+        <pre>/tattoo search runa:Umysł (zielona) tatuaz:wybraniec bogów</pre>
+        <p class="help-note">Efekt: ogłoszenie trafia na listę "Poszukiwane" + webhook. Bez punktów — ale jeśli ktoś już to oferuje, bot Ci to od razu pokaże.</p>
+
+        <h4><code>/tattoo remove</code> — usuwasz swoje ogłoszenie</h4>
+        <p>Pole <code>wpis</code> podpowiada <strong>tylko Twoje</strong> ogłoszenia (i "Dostępne", i "Poszukiwane").</p>
+        <pre>/tattoo remove wpis:[Szukam] wybraniec bogów (Umysł zielona)</pre>
+        <p class="help-note">Zwykłe usunięcie — bez punktów, wpis po prostu znika.</p>
+        <p>Jeśli usuwasz <strong>poszukiwanie</strong>, bo ktoś Ci pomógł je zdobyć, dodaj opcjonalne pole <code>help</code> i wskaż tę osobę (jak przy zwykłej wzmiance @):</p>
+        <pre>/tattoo remove wpis:[Szukam] wybraniec bogów (Umysł zielona) help:@Threxxar</pre>
+        <p class="help-note">Efekt: wpis znika, a <strong>Threxxar dostaje +5 pkt</strong> do rankingu za pomoc. Pole <code>help</code> działa tylko przy usuwaniu poszukiwań (przy "Dostępne" zostanie zignorowane).</p>
+
+        <h4><code>/tattoo ranking</code> — ranking gildii</h4>
+        <pre>/tattoo ranking</pre>
+        <p class="help-note">Pokazuje top 10 graczy wg zdobytych punktów (widoczne też na stronie, zakładka "Ranking gildii").</p>
+
+        <h4>Punktacja — podsumowanie</h4>
+        <ul>
+          <li><code>/tattoo add</code> → <strong>+1 pkt</strong> dla Ciebie</li>
+          <li><code>/tattoo search</code> → 0 pkt</li>
+          <li><code>/tattoo remove ... help:@osoba</code> (tylko dla poszukiwań) → <strong>+5 pkt</strong> dla wskazanej osoby</li>
+        </ul>
+      </div>
+    </div>
   </section>
 </div>
 
@@ -406,6 +569,78 @@
     { key: "obrona", label: "Obrona (biała)", swatch: "#8a94a3" },
     { key: "umysl", label: "Umysł (zielona)", swatch: "#3a7d44" },
     { key: "zniszczenie", label: "Zniszczenie (czerwona)", swatch: "#8a2e1f" }
+  ];
+
+  // Katalog wszystkich tatuaży możliwych do zamówienia — czysto informacyjny,
+  // MUSI pozostać zgodny z FLAT w functions/tattoos.js (bot go używa do
+  // autouzupełniania); nie ma między nimi automatycznej synchronizacji.
+  var TATTOO_GROUPS = [
+    { group: "Wojownik", items: [
+      { name: "mistrz parowania", desc: "Znacząco wzmacnia umiejętność parry i shield block, dodatkowo istnieje szansa na bierne parry." },
+      { name: "niewzruszony obrońca", desc: "Wojownik pewnie stoi na ziemi i ciężko posłać go na ziemię, dodatkowo skraca czas ogłuszenia i unieruchomienia." },
+      { name: "fechmistrz", desc: "Wzmacnia umiejętność wardance. Stan skupienia utrzymuje się także poza walką, a ucieczka zmienia się w taktyczny odwrót." },
+      { name: "miażdżyciel", desc: "Wzmacnia umiejętność overwhelming strike. W stanie skupienia umiejętność staje się bierna." }
+    ]},
+    { group: "Barbarzyńca", items: [
+      { name: "szaleniec", desc: "Znacząco wydłuża czas działania i wzmacnia działanie umiejętności berserk." },
+      { name: "rębacz", desc: "Wzmacnia umiejętność charge, szansę na wywrócenie przeciwnika oraz daje możliwość użycia umiejętności podczas tankowania." },
+      { name: "wirująca zagłada", desc: "Wzmacnia umiejętność whirlwind oraz daje jej szansę na bierne użycie." },
+      { name: "przytłaczające ataki", desc: "Pozwala używać przytłaczających ataków (might blows) w trybie automatycznym. Berserkowanie podtrzymuje ten stan." }
+    ]},
+    { group: "Paladyn", items: [
+      { name: "święty wojownik", desc: "Daje dostęp do piątego kręgu wraz z czarami sanctuary, divine power oraz consecrate." },
+      { name: "obrońca wiary", desc: "Wzmacnia umiejętności obronne." }
+    ]},
+    { group: "Kleryk", items: [
+      { name: "wybraniec bogów", desc: "Znacznie wzmacnia czary leczące." },
+      { name: "bitewne przeszkolenie", desc: "Wzmacnia możliwości bojowe kapłana, dodatkowo podczas walki ma szansę na odzyskanie rzuconego czaru." }
+    ]},
+    { group: "Mag", items: [
+      { name: "mistrz zaklęć", desc: "Ma wpływ na przebicie odporności i siłę rzucanych czarów, dodatkowo podczas walki ma szansę na odzyskanie rzuconego czaru." }
+    ]},
+    { group: "Druid", items: [
+      { name: "obrońca natury", desc: "Umożliwia rzucanie czarów podczas posiadania szponów oraz daje dostęp do czaru nature ally IV." },
+      { name: "drzewko szczęścia", desc: "Czyni każde miejsce przyjaznym dla druida." },
+      { name: "zmiennokształtny", desc: "Wzmacnia przemiany druida oraz pozwala używać zaklęć w zwierzęcej formie." },
+      { name: "przyczajony łowca", desc: "Pantera zawsze szuka cienia, aby się przyczaić." },
+      { name: "wilczy skowyt", desc: "Wilk może użyć więcej niż jednego wilczego wycia w danym czasie." },
+      { name: "taran", desc: "Podczas tratowania niedźwiedź może powalić znacznie większego przeciwnika." }
+    ]},
+    { group: "Złodziej", items: [
+      { name: "cień", desc: "Podczas działania sneaka złodziej automatycznie się ukrywa, wykorzystując swoją umiejętność hide." },
+      { name: "mistrz zamków", desc: "Od poziomu mistrzowskiego wzmacnia umiejętność otwierania zamków w skrzyniach, omija wszelkie blokady." },
+      { name: "mistrz uników", desc: "Wzmacnia umiejętność dodge oraz daje jej szansę na bierne użycie." },
+      { name: "cios śmierci", desc: "Znacząco zwiększa zabójcze umiejętności złodzieja." },
+      { name: "wachlarz ostrzy", desc: "Podczas używania uników złodziej ma szansę na bierne użycie bladesplash na przeciwniku, którego ataku uniknął." }
+    ]},
+    { group: "Czarny Rycerz", items: [
+      { name: "twardy blok", desc: "Daje dostęp do umiejętności shield block na 31 poziomie." },
+      { name: "władca marionetek", desc: "Wzmacnia czas kontrolowania nieumarłych i avatara niemal bez końca." }
+    ]},
+    { group: "Nekromanta, Czarny Rycerz", items: [
+      { name: "nieumarły", desc: "Przemiana w nieumarłą istotę." }
+    ]},
+    { group: "Nomad", items: [
+      { name: "tancerz", desc: "Umożliwia zmianę stylu walki bladefury/bladedance w trakcie walki." },
+      { name: "wirujące ostrza", desc: "Wzmacnia umiejętność cyclone oraz daje jej szansę na bierne użycie." },
+      { name: "piaski pustyni", desc: "Czyni każde miejsce przyjaznym dla nomada." },
+      { name: "taneczny krok", desc: "Nomad nieprzerwanie pozostaje w swoim tanecznym transie, ale wie, kiedy zejść z parkietu niepokonanym." }
+    ]},
+    { group: "Wędrowiec", items: [
+      { name: "grabieżca", desc: "Zwiększa szansę na odkrycie nietypowych łupów w plądrowanych ciałach." }
+    ]},
+    { group: "Triki specjalne", items: [
+      { name: "oko cyklonu", desc: "Zwiększa szansę na trick (cyclone)." },
+      { name: "łowca niewolników", desc: "Zwiększa szansę na trick (entwine)." },
+      { name: "między młotem a kowadłem", desc: "Zwiększa szansę na trick (thundering whack)." }
+    ]},
+    { group: "Wszystkie klasy", items: [
+      { name: "charyzmatyczny przywódca", desc: "Umożliwia wydanie rozkazu wszystkim podwładnym za jednym razem — order all." },
+      { name: "pakt ze śmiercią", desc: "Pan śmierci czasem odwraca wzrok, co czyni śmierć znacznie przyjemniejszą." },
+      { name: "myto ogarów", desc: "Opłacone myto (trzeba mieć przy sobie gotówkę) daje szansę na zachowanie części ekwipunku przy śmierci. Nie działa w PvP." },
+      { name: "bezpieczny skarbiec", desc: "Daje szansę na zachowanie części ekwipunku przy śmierci. Nie działa w PvP." },
+      { name: "głębokie kieszenie", desc: "Podczas plądrowania zwłok rabuś może coś przeoczyć — daje szansę na zachowanie części ekwipunku przy śmierci. Nie działa w PvP." }
+    ]}
   ];
 
   function runeInfoFor(d) {
@@ -560,6 +795,56 @@
     });
   }
 
+  function renderRuneLegend() {
+    var legendEl = document.getElementById("rune-legend");
+    RUNE_COLORS.forEach(function (r) {
+      var item = document.createElement("span");
+      item.className = "rune-legend-item";
+
+      var dot = document.createElement("span");
+      dot.className = "rune-legend-dot";
+      dot.style.background = r.swatch;
+      item.appendChild(dot);
+
+      item.appendChild(document.createTextNode(r.label));
+      legendEl.appendChild(item);
+    });
+  }
+
+  function renderCatalog() {
+    var containerEl = document.getElementById("catalog-groups");
+    TATTOO_GROUPS.forEach(function (g) {
+      var group = document.createElement("div");
+      group.className = "catalog-group";
+
+      var heading = document.createElement("h4");
+      heading.textContent = g.group;
+      group.appendChild(heading);
+
+      g.items.forEach(function (it) {
+        var item = document.createElement("div");
+        item.className = "catalog-item";
+
+        var name = document.createElement("div");
+        name.className = "catalog-item-name";
+        name.textContent = it.name;
+        item.appendChild(name);
+
+        var desc = document.createElement("p");
+        desc.className = "catalog-item-desc";
+        desc.textContent = it.desc;
+        item.appendChild(desc);
+
+        group.appendChild(item);
+      });
+
+      containerEl.appendChild(group);
+    });
+  }
+
+  renderRuneLegend();
+  renderCatalog();
+
   filterEl.addEventListener("input", renderBoard);
   sortFilterEl.addEventListener("change", renderBoard);
 
@@ -574,7 +859,7 @@
     panels.forEach(function (panel) {
       panel.hidden = panel.dataset.panel !== tab;
     });
-    listingFiltersEl.hidden = tab === "ranking";
+    listingFiltersEl.hidden = tab !== "add" && tab !== "search";
   }
 
   tabButtons.forEach(function (btn) {
