@@ -157,6 +157,36 @@
     margin: 0 0 12px;
   }
 
+  .tabs {
+    display: flex;
+    gap: 8px;
+    flex-wrap: wrap;
+    border-bottom: 1px solid var(--border);
+    padding-bottom: 12px;
+  }
+
+  .tab-btn {
+    font: inherit;
+    font-family: var(--font-mono);
+    font-size: 13px;
+    font-weight: 700;
+    letter-spacing: 0.03em;
+    color: var(--text-dim);
+    background: none;
+    border: 1px solid var(--border);
+    border-radius: 999px;
+    padding: 7px 16px;
+    cursor: pointer;
+  }
+
+  .tab-btn:hover { color: var(--text); border-color: var(--accent); }
+
+  .tab-btn[aria-selected="true"] {
+    color: var(--accent-contrast);
+    background: var(--accent);
+    border-color: var(--accent);
+  }
+
   .board-filters {
     display: flex;
     gap: 10px;
@@ -317,39 +347,41 @@
   <section class="board">
     <div class="board-head">
       <h2>Giełda gildii</h2>
-      <div class="board-filters">
-        <select id="sort-filter">
-          <option value="date">Sortuj: data dodania</option>
-          <option value="user">Sortuj: gracz</option>
-          <option value="name">Sortuj: tatuaż</option>
-          <option value="rune">Sortuj: runa</option>
-        </select>
-        <input id="filter" type="search" placeholder="Szukaj po graczu lub tatuażu…">
-      </div>
     </div>
 
-    <div class="board-section">
-      <h3>Dostępne (oddawane)</h3>
+    <div class="tabs" role="tablist">
+      <button type="button" class="tab-btn" data-tab="add" role="tab" aria-selected="true">Dostępne</button>
+      <button type="button" class="tab-btn" data-tab="search" role="tab" aria-selected="false">Poszukiwane</button>
+      <button type="button" class="tab-btn" data-tab="ranking" role="tab" aria-selected="false">Ranking gildii</button>
+    </div>
+
+    <div class="board-filters" id="listing-filters">
+      <select id="sort-filter">
+        <option value="date">Sortuj: data dodania</option>
+        <option value="user">Sortuj: gracz</option>
+        <option value="name">Sortuj: tatuaż</option>
+        <option value="rune">Sortuj: runa</option>
+      </select>
+      <input id="filter" type="search" placeholder="Szukaj po graczu lub tatuażu…">
+    </div>
+
+    <div class="board-section" data-panel="add">
       <div id="list-add" class="listing-list">
         <p class="empty-state">Wczytywanie…</p>
       </div>
     </div>
 
-    <div class="board-section">
-      <h3>Poszukiwane</h3>
+    <div class="board-section" data-panel="search" hidden>
       <div id="list-search" class="listing-list">
         <p class="empty-state">Wczytywanie…</p>
       </div>
     </div>
-  </section>
 
-  <section class="board">
-    <div class="board-head">
-      <h2>Ranking gildii</h2>
+    <div class="board-section" data-panel="ranking" hidden>
+      <ol id="ranking-list" class="ranking-list">
+        <li class="empty-state">Wczytywanie…</li>
+      </ol>
     </div>
-    <ol id="ranking-list" class="ranking-list">
-      <li class="empty-state">Wczytywanie…</li>
-    </ol>
   </section>
 </div>
 
@@ -530,6 +562,24 @@
 
   filterEl.addEventListener("input", renderBoard);
   sortFilterEl.addEventListener("change", renderBoard);
+
+  var tabButtons = Array.prototype.slice.call(document.querySelectorAll(".tab-btn"));
+  var panels = Array.prototype.slice.call(document.querySelectorAll(".board-section[data-panel]"));
+  var listingFiltersEl = document.getElementById("listing-filters");
+
+  function selectTab(tab) {
+    tabButtons.forEach(function (btn) {
+      btn.setAttribute("aria-selected", btn.dataset.tab === tab ? "true" : "false");
+    });
+    panels.forEach(function (panel) {
+      panel.hidden = panel.dataset.panel !== tab;
+    });
+    listingFiltersEl.hidden = tab === "ranking";
+  }
+
+  tabButtons.forEach(function (btn) {
+    btn.addEventListener("click", function () { selectTab(btn.dataset.tab); });
+  });
 
   var isConfigured = firebaseConfig.apiKey.indexOf("TWOJ_") !== 0;
 

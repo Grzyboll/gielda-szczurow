@@ -30,15 +30,15 @@ Zastąp wartości `TWOJ_...` danymi skopiowanymi z Firebase. Zapisz plik.
 Funkcja `discordInteractions` (w [`functions/`](functions)) obsługuje komendę slash `/tattoo` z czterema podkomendami. Tożsamość gracza (nick) jest zawsze pobierana automatycznie z Discorda (nick serwerowy, jeśli go ustawił, inaczej jego globalna nazwa) — nigdzie nie trzeba go wpisywać ręcznie.
 
 - **`/tattoo add runa:<kolor> tatuaz:<nazwa>`** — masz ten tatuaż i chcesz go oddać. **+1 pkt** do rankingu.
-- **`/tattoo search runa:<kolor> tatuaz:<nazwa>`** — szukasz tego tatuażu. **+1 pkt** do rankingu.
-- **`/tattoo remove wpis:<Twoje ogłoszenie> [pomogl:<@osoba>]`** — usuwa jedno z Twoich własnych ogłoszeń (podpowiedzi pokazują tylko Twoje wpisy). Jeśli usuwasz **poszukiwanie** bo je zdobyłeś, wskaż w opcjonalnym polu `pomogl` osobę, która Ci pomogła (wybierasz ją jak przy zwykłej wzmiance @) — dostanie **+5 pkt**.
+- **`/tattoo search runa:<kolor> tatuaz:<nazwa>`** — szukasz tego tatuażu. Bez punktów — to `add` (oddanie tatuażu) się liczy, nie samo szukanie.
+- **`/tattoo remove wpis:<Twoje ogłoszenie> [help:<@osoba>]`** — usuwa jedno z Twoich własnych ogłoszeń (podpowiedzi pokazują tylko Twoje wpisy). Jeśli usuwasz **poszukiwanie** bo je zdobyłeś, wskaż w opcjonalnym polu `help` osobę, która Ci pomogła (wybierasz ją jak przy zwykłej wzmiance @) — dostanie **+5 pkt**.
 - **`/tattoo ranking`** — pokazuje top 10 graczy wg punktów.
 
 Przy `add`/`search` bot dodatkowo:
 - sprawdza, czy po drugiej stronie (kogoś kto szuka / coś oferuje) już istnieje pasujący wpis na ten sam tatuaż + runę — jeśli tak, dopisuje w odpowiedzi kto to jest i oznacza go (`@wzmianka`), żeby można było się od razu odezwać;
 - wysyła ogłoszenie na webhook Discorda (ten sam mechanizm co dawniej — patrz niżej), więc nowy wpis widać na dedykowanym kanale niezależnie od tego, gdzie komenda została użyta.
 
-Ranking widać też na żywo na stronie (sekcja "Ranking gildii" pod listami).
+Na stronie giełda i ranking są teraz w zakładkach ("Dostępne" / "Poszukiwane" / "Ranking gildii") zamiast jednej długiej listy do przewijania.
 
 Wymaga to konta z płatnością włączoną (plan **Blaze** — pay-as-you-go; przy małym ruchu koszt to praktycznie $0, patrz cennik Cloud Functions) oraz własnej aplikacji/bota w Discord Developer Portal.
 

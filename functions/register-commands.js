@@ -64,7 +64,7 @@ const command = {
           autocomplete: true
         },
         {
-          name: "pomogl",
+          name: "help",
           description: "Usuwasz poszukiwanie bo znalazłeś? Zaznacz kto pomógł — dostanie +5 pkt",
           type: 6, // USER
           required: false

@@ -185,9 +185,9 @@ async function handleAddOrSearch(sub, user, res) {
   };
 
   await admin.firestore().collection("listings").add(listing);
-  await awardPoints(user.id, user.displayName, 1);
 
   const isAdd = sub.name === "add";
+  if (isAdd) await awardPoints(user.id, user.displayName, 1);
   const verb = isAdd ? "ma do oddania tatuaż" : "szuka tatuażu";
   const headline =
     "**" + user.displayName + "** " + verb + ": **" + item.name + "** [" + rune.label + "] (" + item.cls + ")\n> " + item.desc;
@@ -237,7 +237,7 @@ async function handleRemove(sub, user, interaction, res) {
   await docRef.delete();
 
   var bonusNote = "";
-  const helperId = sub.opts.pomogl;
+  const helperId = sub.opts.help;
 
   if (helperId) {
     if (data.type !== "search") {
