@@ -129,7 +129,7 @@ async function handleAutocomplete(interaction, res) {
     return;
   }
 
-  if (focused.name === "wpis") {
+  if (focused.name === "entry") {
     const user = getDiscordUser(interaction);
     const query = String(focused.value || "").trim().toLowerCase();
 
@@ -159,7 +159,7 @@ async function handleAutocomplete(interaction, res) {
 async function handleAddOrSearch(sub, user, res) {
   const tattooName = String(sub.opts.tatuaz || "").trim();
   const item = FLAT.find((it) => it.name === tattooName);
-  const rune = RUNE_COLORS.find((r) => r.key === sub.opts.runa);
+  const rune = RUNE_COLORS.find((r) => r.key === sub.opts.rune);
 
   if (!item || !rune) {
     res.json({
@@ -213,7 +213,7 @@ async function handleAddOrSearch(sub, user, res) {
 }
 
 async function handleRemove(sub, user, interaction, res) {
-  const docId = String(sub.opts.wpis || "").trim();
+  const docId = String(sub.opts.entry || "").trim();
   if (!docId) {
     res.json({
       type: InteractionResponseType.CHANNEL_MESSAGE_WITH_SOURCE,

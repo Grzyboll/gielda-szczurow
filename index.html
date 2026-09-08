@@ -517,20 +517,20 @@
         <p class="panel-intro">Ta strona tylko pokazuje ogłoszenia — wszystko dodajesz, szukasz i usuwasz komendami bota na Discordzie (na dowolnym kanale, gdzie jest dodany bot). Zacznij pisać <code>/tattoo</code>, a Discord podpowie Ci dalsze pola.</p>
 
         <h4><code>/tattoo add</code> — oddajesz tatuaż, który masz</h4>
-        <p>Pola: <code>runa</code> (wybierz z listy) i <code>tatuaz</code> (zacznij pisać, wybierz z podpowiedzi). Nick brany jest automatycznie z Discorda.</p>
-        <pre>/tattoo add runa:Zniszczenie (czerwona) tatuaz:mistrz parowania</pre>
+        <p>Pola: <code>rune</code> (wybierz z listy) i <code>tatuaz</code> (zacznij pisać, wybierz z podpowiedzi). Nick brany jest automatycznie z Discorda.</p>
+        <pre>/tattoo add rune:Zniszczenie (czerwona) tatuaz:mistrz parowania</pre>
         <p class="help-note">Efekt: ogłoszenie trafia na listę "Dostępne", leci na kanał ogłoszeń (webhook), a Ty dostajesz <strong>+1 pkt</strong> do rankingu. Jeśli ktoś już szuka dokładnie tego tatuażu w tej samej runie — bot od razu Ci go wskaże (z oznaczeniem @), żebyś mógł się odezwać.</p>
 
         <h4><code>/tattoo search</code> — szukasz tatuażu</h4>
-        <pre>/tattoo search runa:Umysł (zielona) tatuaz:wybraniec bogów</pre>
+        <pre>/tattoo search rune:Umysł (zielona) tatuaz:wybraniec bogów</pre>
         <p class="help-note">Efekt: ogłoszenie trafia na listę "Poszukiwane" + webhook. Bez punktów — ale jeśli ktoś już to oferuje, bot Ci to od razu pokaże.</p>
 
         <h4><code>/tattoo remove</code> — usuwasz swoje ogłoszenie</h4>
-        <p>Pole <code>wpis</code> podpowiada <strong>tylko Twoje</strong> ogłoszenia (i "Dostępne", i "Poszukiwane").</p>
-        <pre>/tattoo remove wpis:[Szukam] wybraniec bogów (Umysł zielona)</pre>
+        <p>Pole <code>entry</code> podpowiada <strong>tylko Twoje</strong> ogłoszenia (i "Dostępne", i "Poszukiwane").</p>
+        <pre>/tattoo remove entry:[Szukam] wybraniec bogów (Umysł zielona)</pre>
         <p class="help-note">Zwykłe usunięcie — bez punktów, wpis po prostu znika.</p>
         <p>Jeśli usuwasz <strong>poszukiwanie</strong>, bo ktoś Ci pomógł je zdobyć, dodaj opcjonalne pole <code>help</code> i wskaż tę osobę (jak przy zwykłej wzmiance @):</p>
-        <pre>/tattoo remove wpis:[Szukam] wybraniec bogów (Umysł zielona) help:@Threxxar</pre>
+        <pre>/tattoo remove entry:[Szukam] wybraniec bogów (Umysł zielona) help:@Threxxar</pre>
         <p class="help-note">Efekt: wpis znika, a <strong>Threxxar dostaje +5 pkt</strong> do rankingu za pomoc. Pole <code>help</code> działa tylko przy usuwaniu poszukiwań (przy "Dostępne" zostanie zignorowane).</p>
 
         <h4><code>/tattoo ranking</code> — ranking gildii</h4>

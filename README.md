@@ -29,9 +29,9 @@ Zastąp wartości `TWOJ_...` danymi skopiowanymi z Firebase. Zapisz plik.
 
 Funkcja `discordInteractions` (w [`functions/`](functions)) obsługuje komendę slash `/tattoo` z czterema podkomendami. Tożsamość gracza (nick) jest zawsze pobierana automatycznie z Discorda (nick serwerowy, jeśli go ustawił, inaczej jego globalna nazwa) — nigdzie nie trzeba go wpisywać ręcznie.
 
-- **`/tattoo add runa:<kolor> tatuaz:<nazwa>`** — masz ten tatuaż i chcesz go oddać. **+1 pkt** do rankingu.
-- **`/tattoo search runa:<kolor> tatuaz:<nazwa>`** — szukasz tego tatuażu. Bez punktów — to `add` (oddanie tatuażu) się liczy, nie samo szukanie.
-- **`/tattoo remove wpis:<Twoje ogłoszenie> [help:<@osoba>]`** — usuwa jedno z Twoich własnych ogłoszeń (podpowiedzi pokazują tylko Twoje wpisy). Jeśli usuwasz **poszukiwanie** bo je zdobyłeś, wskaż w opcjonalnym polu `help` osobę, która Ci pomogła (wybierasz ją jak przy zwykłej wzmiance @) — dostanie **+5 pkt**.
+- **`/tattoo add rune:<kolor> tatuaz:<nazwa>`** — masz ten tatuaż i chcesz go oddać. **+1 pkt** do rankingu.
+- **`/tattoo search rune:<kolor> tatuaz:<nazwa>`** — szukasz tego tatuażu. Bez punktów — to `add` (oddanie tatuażu) się liczy, nie samo szukanie.
+- **`/tattoo remove entry:<Twoje ogłoszenie> [help:<@osoba>]`** — usuwa jedno z Twoich własnych ogłoszeń (podpowiedzi pokazują tylko Twoje wpisy). Jeśli usuwasz **poszukiwanie** bo je zdobyłeś, wskaż w opcjonalnym polu `help` osobę, która Ci pomogła (wybierasz ją jak przy zwykłej wzmiance @) — dostanie **+5 pkt**.
 - **`/tattoo ranking`** — pokazuje top 10 graczy wg punktów.
 
 Przy `add`/`search` bot dodatkowo:
@@ -80,7 +80,7 @@ Wymaga to konta z płatnością włączoną (plan **Blaze** — pay-as-you-go; p
 
 10. Zaproś bota na serwer: Developer Portal → **OAuth2 → URL Generator** → zaznacz scope **`applications.commands`** (samo to wystarczy do obsługi komend slash — scope `bot` jest potrzebny tylko jeśli chcesz mu dodatkowo nadać inne uprawnienia) → skopiuj wygenerowany link → otwórz go w przeglądarce → wybierz swój serwer.
 
-11. Na Discordzie wpisz `/tattoo add` (albo `search`/`remove`) na dowolnym kanale, gdzie jest bot — powinny pojawić się pola `runa` (lista do wyboru) i `tatuaz`/`wpis` (podpowiedzi po zaczęciu pisania).
+11. Na Discordzie wpisz `/tattoo add` (albo `search`/`remove`) na dowolnym kanale, gdzie jest bot — powinny pojawić się pola `rune` (lista do wyboru) i `tatuaz`/`entry` (podpowiedzi po zaczęciu pisania).
 
 Uwaga: Public Key **nie jest tajny** (Discord i tak go publikuje), ale trzymamy go jako sekret dla spójności z resztą konfiguracji — nic złego się nie stanie jeśli ktoś go pozna. Token bota **jest** tajny i nigdzie w repo się nie zapisuje — używasz go tylko raz, lokalnie, do rejestracji komend.
 

@@ -20,7 +20,7 @@ const runeChoices = RUNE_COLORS.map((r) => ({ name: r.label, value: r.key }));
 
 const addSearchOptions = [
   {
-    name: "runa",
+    name: "rune",
     description: "Kolor runy",
     type: 3, // STRING
     required: true,
@@ -57,7 +57,7 @@ const command = {
       type: 1,
       options: [
         {
-          name: "wpis",
+          name: "entry",
           description: "Wybierz swoje ogłoszenie do usunięcia",
           type: 3,
           required: true,
