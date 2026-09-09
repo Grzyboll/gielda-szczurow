@@ -247,11 +247,13 @@
   .ranking-row[aria-expanded="true"] .ranking-chevron { transform: rotate(90deg); }
 
   .ranking-history {
-    display: flex;
+    display: none;
     flex-direction: column;
     gap: 6px;
     padding: 10px 16px 6px 30px;
   }
+
+  .ranking-history:not([hidden]) { display: flex; }
 
   .ranking-history-item {
     display: flex;
@@ -582,7 +584,7 @@
         <p class="help-note">Zwykłe usunięcie — bez punktów, wpis po prostu znika.</p>
         <p>Jeśli usuwasz <strong>poszukiwanie</strong>, bo ktoś Ci pomógł je zdobyć, dodaj opcjonalne pole <code>help</code> i wskaż tę osobę (jak przy zwykłej wzmiance @):</p>
         <pre>/tattoo remove entry:[Szukam] wybraniec bogów (Umysł zielona) help:@Threxxar</pre>
-        <p class="help-note">Efekt: wpis znika, a <strong>Threxxar dostaje +5 pkt</strong> do rankingu za pomoc. Pole <code>help</code> działa tylko przy usuwaniu poszukiwań (przy "Dostępne" zostanie zignorowane).</p>
+        <p class="help-note">Efekt: wpis znika, a <strong>Threxxar dostaje +5 pkt</strong> do rankingu za pomoc. Pole <code>help</code> działa tylko przy usuwaniu poszukiwań (przy "Dostępne" zostanie zignorowane). Jeśli Threxxar ma na giełdzie dokładnie jedną ofertę tego samego tatuażu, bot <strong>automatycznie usunie też ją</strong> — transakcja jest zakończona, więc nie zostaje już potrzebna. Jeśli ma więcej niż jedną taką ofertę, bot nic nie kasuje sam i prosi o ręczne usunięcie, żeby nie zgadywać, o którą chodziło.</p>
 
         <h4><code>/tattoo ranking</code> — ranking gildii</h4>
         <pre>/tattoo ranking</pre>

@@ -97,6 +97,20 @@ async function findMatches(oppositeType, name, runeKey) {
     .filter((d) => d.name === name && d.rune === runeKey);
 }
 
+async function findOwnedMatch(discordUserId, type, name, runeKey) {
+  const snap = await admin.firestore()
+    .collection("listings")
+    .where("discordUserId", "==", discordUserId)
+    .where("type", "==", type)
+    .limit(50)
+    .get();
+
+  return snap.docs.filter((d) => {
+    const data = d.data();
+    return data.name === name && data.rune === runeKey;
+  });
+}
+
 async function awardPoints(discordUserId, discordUsername, points, reason) {
   if (!discordUserId || !points) return;
   const ref = admin.firestore().collection("rankings").doc(discordUserId);
@@ -265,6 +279,17 @@ async function handleRemove(sub, user, interaction, res) {
       await sendWebhook(
         "🏆 <@" + helperId + "> dostaje +5 pkt — pomógł/pomogła **" + user.displayName + "** zdobyć **" + data.name + "** [" + data.runeLabel + "]!"
       );
+
+      const ownedMatches = await findOwnedMatch(helperId, "add", data.name, data.rune);
+      if (ownedMatches.length === 1) {
+        await ownedMatches[0].ref.delete();
+        bonusNote += "\n♻️ Oferta <@" + helperId + "> na ten tatuaż też zniknęła z giełdy — transakcja zakończona.";
+        await sendWebhook(
+          "♻️ Transakcja zakończona: oferta **" + data.name + "** [" + data.runeLabel + "] od <@" + helperId + "> została automatycznie usunięta."
+        );
+      } else if (ownedMatches.length > 1) {
+        bonusNote += "\n⚠️ <@" + helperId + "> ma więcej niż jedną ofertę na ten tatuaż — usuń niepotrzebną ręcznie (`/tattoo remove`).";
+      }
     }
   }
 
