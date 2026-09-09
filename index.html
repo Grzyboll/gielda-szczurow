@@ -214,14 +214,64 @@
     list-style: none;
   }
 
+  .ranking-item { list-style: none; }
+
   .ranking-row {
     display: flex;
     align-items: baseline;
     gap: 10px;
+    width: 100%;
     background: var(--surface);
     border: 1px solid var(--border);
     border-radius: 4px;
     padding: 10px 16px;
+    font: inherit;
+    color: inherit;
+    text-align: left;
+    cursor: pointer;
+  }
+
+  .ranking-row:hover { border-color: var(--accent); }
+
+  .ranking-row:focus-visible {
+    outline: 2px solid var(--accent);
+    outline-offset: 2px;
+  }
+
+  .ranking-chevron {
+    font-family: var(--font-mono);
+    color: var(--text-dim);
+    transition: transform 0.15s ease;
+  }
+
+  .ranking-row[aria-expanded="true"] .ranking-chevron { transform: rotate(90deg); }
+
+  .ranking-history {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    padding: 10px 16px 6px 30px;
+  }
+
+  .ranking-history-item {
+    display: flex;
+    align-items: baseline;
+    gap: 8px;
+    font-family: var(--font-mono);
+    font-size: 12px;
+    color: var(--text-dim);
+  }
+
+  .ranking-history-points {
+    color: var(--accent);
+    font-weight: 700;
+    flex-shrink: 0;
+  }
+
+  .ranking-history-time {
+    margin-left: auto;
+    flex-shrink: 0;
+    white-space: nowrap;
   }
 
   .ranking-medal {
@@ -665,6 +715,9 @@
   var rankingListEl = document.getElementById("ranking-list");
 
   var allDocs = [];
+  var allHistory = [];
+  var expandedUsers = {};
+  var historyElsByUser = {};
 
   function sortDocs(docs) {
     var sortBy = sortFilterEl.value;
@@ -762,8 +815,43 @@
 
   var MEDALS = ["🥇", "🥈", "🥉"];
 
+  function renderHistoryFor(discordUserId, containerEl) {
+    containerEl.textContent = "";
+    var events = allHistory.filter(function (h) { return h.discordUserId === discordUserId; });
+
+    if (events.length === 0) {
+      var empty = document.createElement("p");
+      empty.className = "empty-state";
+      empty.textContent = "Brak zapisanej historii dla tego gracza.";
+      containerEl.appendChild(empty);
+      return;
+    }
+
+    events.forEach(function (h) {
+      var row = document.createElement("div");
+      row.className = "ranking-history-item";
+
+      var pts = document.createElement("span");
+      pts.className = "ranking-history-points";
+      pts.textContent = "+" + h.points;
+      row.appendChild(pts);
+
+      var reason = document.createElement("span");
+      reason.textContent = h.reason || "";
+      row.appendChild(reason);
+
+      var time = document.createElement("span");
+      time.className = "ranking-history-time";
+      time.textContent = typeof h.ts === "number" ? timeAgo(h.ts) : "";
+      row.appendChild(time);
+
+      containerEl.appendChild(row);
+    });
+  }
+
   function renderRanking(docs) {
     rankingListEl.textContent = "";
+    historyElsByUser = {};
 
     if (docs.length === 0) {
       var empty = document.createElement("li");
@@ -774,8 +862,13 @@
     }
 
     docs.forEach(function (d, i) {
-      var row = document.createElement("li");
+      var item = document.createElement("li");
+      item.className = "ranking-item";
+
+      var row = document.createElement("button");
+      row.type = "button";
       row.className = "ranking-row";
+      row.setAttribute("aria-expanded", expandedUsers[d.discordUserId] ? "true" : "false");
 
       var medal = document.createElement("span");
       medal.className = "ranking-medal";
@@ -792,7 +885,30 @@
       points.textContent = (d.points || 0) + " pkt";
       row.appendChild(points);
 
-      rankingListEl.appendChild(row);
+      var chevron = document.createElement("span");
+      chevron.className = "ranking-chevron";
+      chevron.setAttribute("aria-hidden", "true");
+      chevron.textContent = "▸";
+      row.appendChild(chevron);
+
+      var historyEl = document.createElement("div");
+      historyEl.className = "ranking-history";
+      historyEl.hidden = !expandedUsers[d.discordUserId];
+      historyElsByUser[d.discordUserId] = historyEl;
+
+      row.addEventListener("click", function () {
+        var willExpand = !expandedUsers[d.discordUserId];
+        expandedUsers[d.discordUserId] = willExpand;
+        row.setAttribute("aria-expanded", willExpand ? "true" : "false");
+        historyEl.hidden = !willExpand;
+        if (willExpand) renderHistoryFor(d.discordUserId, historyEl);
+      });
+
+      item.appendChild(row);
+      item.appendChild(historyEl);
+      rankingListEl.appendChild(item);
+
+      if (expandedUsers[d.discordUserId]) renderHistoryFor(d.discordUserId, historyEl);
     });
   }
 
@@ -912,6 +1028,18 @@
         errMsg.className = "empty-state";
         errMsg.textContent = "Nie udało się wczytać rankingu (" + err.code + ").";
         rankingListEl.appendChild(errMsg);
+      }
+    );
+
+    dbRef.collection("pointHistory").orderBy("ts", "desc").limit(500).onSnapshot(
+      function (snap) {
+        allHistory = snap.docs.map(function (doc) { return doc.data(); });
+        Object.keys(historyElsByUser).forEach(function (uid) {
+          if (expandedUsers[uid]) renderHistoryFor(uid, historyElsByUser[uid]);
+        });
+      },
+      function () {
+        // Historia jest dodatkiem — brak dostępu do niej nie blokuje reszty strony.
       }
     );
   }

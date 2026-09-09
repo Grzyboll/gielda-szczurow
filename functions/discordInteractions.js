@@ -97,7 +97,7 @@ async function findMatches(oppositeType, name, runeKey) {
     .filter((d) => d.name === name && d.rune === runeKey);
 }
 
-async function awardPoints(discordUserId, discordUsername, points) {
+async function awardPoints(discordUserId, discordUsername, points, reason) {
   if (!discordUserId || !points) return;
   const ref = admin.firestore().collection("rankings").doc(discordUserId);
   await ref.set(
@@ -108,6 +108,13 @@ async function awardPoints(discordUserId, discordUsername, points) {
     },
     { merge: true }
   );
+  await admin.firestore().collection("pointHistory").add({
+    discordUserId,
+    discordUsername,
+    points,
+    reason,
+    ts: Date.now()
+  });
 }
 
 async function handleAutocomplete(interaction, res) {
@@ -187,7 +194,9 @@ async function handleAddOrSearch(sub, user, res) {
   await admin.firestore().collection("listings").add(listing);
 
   const isAdd = sub.name === "add";
-  if (isAdd) await awardPoints(user.id, user.displayName, 1);
+  if (isAdd) {
+    await awardPoints(user.id, user.displayName, 1, "Dodał tatuaż: " + item.name + " [" + rune.label + "]");
+  }
   const verb = isAdd ? "ma do oddania tatuaż" : "szuka tatuażu";
   const headline =
     "**" + user.displayName + "** " + verb + ": **" + item.name + "** [" + rune.label + "] (" + item.cls + ")\n> " + item.desc;
@@ -246,7 +255,12 @@ async function handleRemove(sub, user, interaction, res) {
       bonusNote = "\n(Nie można przyznać punktów samemu sobie.)";
     } else {
       const helper = resolveMentionedUser(interaction, helperId);
-      await awardPoints(helperId, helper.displayName, 5);
+      await awardPoints(
+        helperId,
+        helper.displayName,
+        5,
+        "Pomógł/pomogła zdobyć: " + data.name + " [" + data.runeLabel + "] (dla " + user.displayName + ")"
+      );
       bonusNote = "\n+5 pkt dla <@" + helperId + "> — dzięki!";
       await sendWebhook(
         "🏆 <@" + helperId + "> dostaje +5 pkt — pomógł/pomogła **" + user.displayName + "** zdobyć **" + data.name + "** [" + data.runeLabel + "]!"
