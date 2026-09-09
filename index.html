@@ -196,7 +196,8 @@
   #filter { max-width: 260px; }
   #sort-filter { max-width: 190px; width: auto; }
 
-  .board-section { display: flex; flex-direction: column; }
+  .board-section { display: none; flex-direction: column; }
+  .board-section:not([hidden]) { display: flex; }
 
   .listing-list {
     display: flex;
