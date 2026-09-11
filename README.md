@@ -31,12 +31,14 @@ Funkcja `discordInteractions` (w [`functions/`](functions)) obsługuje komendę 
 
 - **`/tattoo add rune:<kolor> tatuaz:<nazwa>`** — masz ten tatuaż i chcesz go oddać. **+1 pkt** do rankingu.
 - **`/tattoo search rune:<kolor> tatuaz:<nazwa>`** — szukasz tego tatuażu. Bez punktów — to `add` (oddanie tatuażu) się liczy, nie samo szukanie.
-- **`/tattoo remove entry:<Twoje ogłoszenie> [help:<@osoba>]`** — usuwa jedno z Twoich własnych ogłoszeń (podpowiedzi pokazują tylko Twoje wpisy). Jeśli usuwasz **poszukiwanie** bo je zdobyłeś, wskaż w opcjonalnym polu `help` osobę, która Ci pomogła (wybierasz ją jak przy zwykłej wzmiance @) — dostanie **+5 pkt**.
+- **`/tattoo remove entry:<Twoje ogłoszenie> [help:<@osoba>]`** — usuwa jedno z Twoich własnych ogłoszeń (podpowiedzi pokazują tylko Twoje wpisy). Jeśli usuwasz **poszukiwanie** bo je zdobyłeś, wskaż w opcjonalnym polu `help` osobę, która Ci pomogła (wybierasz ją jak przy zwykłej wzmiance @) — dostanie **+5 pkt**. Jeśli ta osoba ma na giełdzie dokładnie jedną ofertę tego samego tatuażu, bot automatycznie usunie też ją (transakcja zakończona); przy więcej niż jednej pasującej ofercie nic nie kasuje sam, tylko prosi o ręczne usunięcie.
 - **`/tattoo ranking`** — pokazuje top 10 graczy wg punktów.
 
 Przy `add`/`search` bot dodatkowo:
 - sprawdza, czy po drugiej stronie (kogoś kto szuka / coś oferuje) już istnieje pasujący wpis na ten sam tatuaż + runę — jeśli tak, dopisuje w odpowiedzi kto to jest i oznacza go (`@wzmianka`), żeby można było się od razu odezwać;
 - wysyła ogłoszenie na webhook Discorda (ten sam mechanizm co dawniej — patrz niżej), więc nowy wpis widać na dedykowanym kanale niezależnie od tego, gdzie komenda została użyta.
+
+**Tatuaże mistrzostwa** — osobna, bardzo rzadka kategoria: nie dają efektu i nie są przypisane do klasy/rasy. Zamiast runy mają część ciała, na którą się nakłada (ramiona / klatka / plecy / nogi). Dodaje się je tym samym `/tattoo add`/`/tattoo search`, zaznaczając pole `mistrzostwo:True` i wybierając `czesc-ciala` zamiast `rune`/`tatuaz`, np. `/tattoo add mistrzostwo:True czesc-ciala:Nogi`. Reszta mechaniki (punkty, dopasowania, usuwanie) działa identycznie jak dla zwykłych tatuaży.
 
 Na stronie giełda i ranking są teraz w zakładkach ("Dostępne" / "Poszukiwane" / "Ranking gildii") zamiast jednej długiej listy do przewijania.
 

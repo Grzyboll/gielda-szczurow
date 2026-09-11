@@ -14,24 +14,41 @@ if (!applicationId || !botToken) {
   process.exit(1);
 }
 
-const { RUNE_COLORS } = require("./tattoos");
+const { RUNE_COLORS, BODY_PARTS } = require("./tattoos");
 
 const runeChoices = RUNE_COLORS.map((r) => ({ name: r.label, value: r.key }));
+const bodyPartChoices = BODY_PARTS.map((b) => ({ name: b.label, value: b.key }));
 
+// rune/tatuaz zostają opcjonalne na poziomie Discorda, bo Discord nie wspiera
+// pól "wymaganych warunkowo" — walidacja (rune+tatuaz ALBO mistrzostwo+część
+// ciała) dzieje się w discordInteractions.js.
 const addSearchOptions = [
   {
     name: "rune",
-    description: "Kolor runy",
+    description: "Kolor runy (pomiń przy tatuażu mistrzostwa)",
     type: 3, // STRING
-    required: true,
+    required: false,
     choices: runeChoices
   },
   {
     name: "tatuaz",
-    description: "Zacznij pisać nazwę tatuażu / bonusu klasowego i wybierz z podpowiedzi",
+    description: "Nazwa tatuażu/bonusu klasowego — pisz i wybierz z podpowiedzi (pomiń dla mistrzostwa)",
     type: 3,
-    required: true,
+    required: false,
     autocomplete: true
+  },
+  {
+    name: "mistrzostwo",
+    description: "To tatuaż mistrzostwa (rzadki, bez efektu, nieprzypisany do klasy) — zamiast runy podaj część ciała",
+    type: 5, // BOOLEAN
+    required: false
+  },
+  {
+    name: "czesc-ciala",
+    description: "Część ciała (tylko dla tatuażu mistrzostwa)",
+    type: 3,
+    required: false,
+    choices: bodyPartChoices
   }
 ];
 

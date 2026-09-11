@@ -2,7 +2,7 @@ const { onRequest } = require("firebase-functions/v2/https");
 const { defineSecret } = require("firebase-functions/params");
 const nacl = require("tweetnacl");
 const admin = require("firebase-admin");
-const { FLAT, RUNE_COLORS } = require("./tattoos");
+const { FLAT, RUNE_COLORS, BODY_PARTS, MASTERY_TATTOO_NAME } = require("./tattoos");
 
 const discordPublicKey = defineSecret("DISCORD_PUBLIC_KEY");
 const discordWebhookUrl = defineSecret("DISCORD_WEBHOOK_URL");
@@ -85,19 +85,25 @@ async function sendWebhook(content) {
   }
 }
 
-async function findMatches(oppositeType, name, runeKey) {
+function classMatcher(name, runeKey) {
+  return (d) => d.kind !== "mastery" && d.name === name && d.rune === runeKey;
+}
+
+function masteryMatcher(bodyPartKey) {
+  return (d) => d.kind === "mastery" && d.bodyPart === bodyPartKey;
+}
+
+async function findMatches(oppositeType, matcherFn) {
   const snap = await admin.firestore()
     .collection("listings")
     .where("type", "==", oppositeType)
     .limit(200)
     .get();
 
-  return snap.docs
-    .map((d) => d.data())
-    .filter((d) => d.name === name && d.rune === runeKey);
+  return snap.docs.map((d) => d.data()).filter(matcherFn);
 }
 
-async function findOwnedMatch(discordUserId, type, name, runeKey) {
+async function findOwnedMatch(discordUserId, type, matcherFn) {
   const snap = await admin.firestore()
     .collection("listings")
     .where("discordUserId", "==", discordUserId)
@@ -105,10 +111,7 @@ async function findOwnedMatch(discordUserId, type, name, runeKey) {
     .limit(50)
     .get();
 
-  return snap.docs.filter((d) => {
-    const data = d.data();
-    return data.name === name && data.rune === runeKey;
-  });
+  return snap.docs.filter((d) => matcherFn(d.data()));
 }
 
 async function awardPoints(discordUserId, discordUsername, points, reason) {
@@ -166,7 +169,7 @@ async function handleAutocomplete(interaction, res) {
       .filter(({ data }) => !query || data.name.toLowerCase().includes(query))
       .slice(0, 25)
       .map(({ id, data }) => ({
-        name: (data.type === "add" ? "[Oddaję] " : "[Szukam] ") + data.name + " (" + data.runeLabel + ")",
+        name: (data.type === "add" ? "[Oddaję] " : "[Szukam] ") + data.name + " (" + (data.kind === "mastery" ? data.bodyPartLabel : data.runeLabel) + ")",
         value: id
       }));
 
@@ -178,6 +181,10 @@ async function handleAutocomplete(interaction, res) {
 }
 
 async function handleAddOrSearch(sub, user, res) {
+  if (sub.opts.mistrzostwo === true) {
+    return handleMasteryAddOrSearch(sub, user, res);
+  }
+
   const tattooName = String(sub.opts.tatuaz || "").trim();
   const item = FLAT.find((it) => it.name === tattooName);
   const rune = RUNE_COLORS.find((r) => r.key === sub.opts.rune);
@@ -186,7 +193,7 @@ async function handleAddOrSearch(sub, user, res) {
     res.json({
       type: InteractionResponseType.CHANNEL_MESSAGE_WITH_SOURCE,
       data: {
-        content: "Wybierz tatuaż z podpowiedzi (autouzupełnianie), a nie wpisuj go ręcznie.",
+        content: "Wybierz tatuaż z podpowiedzi (autouzupełnianie) i runę, a nie wpisuj ich ręcznie. Dla tatuażu mistrzostwa zaznacz pole `mistrzostwo` i wybierz `czesc-ciala` zamiast tego.",
         flags: EPHEMERAL
       }
     });
@@ -196,6 +203,7 @@ async function handleAddOrSearch(sub, user, res) {
   const listing = {
     discordUserId: user.id,
     discordUsername: user.displayName,
+    kind: "class",
     name: item.name,
     cls: item.cls,
     desc: item.desc,
@@ -215,7 +223,61 @@ async function handleAddOrSearch(sub, user, res) {
   const headline =
     "**" + user.displayName + "** " + verb + ": **" + item.name + "** [" + rune.label + "] (" + item.cls + ")\n> " + item.desc;
 
-  const matches = await findMatches(isAdd ? "search" : "add", item.name, rune.key);
+  const matches = await findMatches(isAdd ? "search" : "add", classMatcher(item.name, rune.key));
+  var matchNote = "";
+  if (matches.length > 0) {
+    const names = matches
+      .map((m) => m.discordUsername + (m.discordUserId ? " (<@" + m.discordUserId + ">)" : ""))
+      .join(", ");
+    matchNote = isAdd
+      ? "\n\n🔔 Ktoś już tego szuka: " + names
+      : "\n\n🔔 To jest już dostępne! Ma to: " + names;
+  }
+
+  const webhookPrefix = isAdd ? "🟢 Nowa oferta" : "🔍 Nowe poszukiwanie";
+  await sendWebhook(webhookPrefix + " — " + headline + matchNote);
+
+  res.json({
+    type: InteractionResponseType.CHANNEL_MESSAGE_WITH_SOURCE,
+    data: { content: headline + matchNote }
+  });
+}
+
+async function handleMasteryAddOrSearch(sub, user, res) {
+  const bodyPart = BODY_PARTS.find((b) => b.key === sub.opts["czesc-ciala"]);
+
+  if (!bodyPart) {
+    res.json({
+      type: InteractionResponseType.CHANNEL_MESSAGE_WITH_SOURCE,
+      data: {
+        content: "Dla tatuażu mistrzostwa wybierz pole `czesc-ciala` (ramiona / klatka / plecy / nogi).",
+        flags: EPHEMERAL
+      }
+    });
+    return;
+  }
+
+  const listing = {
+    discordUserId: user.id,
+    discordUsername: user.displayName,
+    kind: "mastery",
+    name: MASTERY_TATTOO_NAME,
+    bodyPart: bodyPart.key,
+    bodyPartLabel: bodyPart.label,
+    type: sub.name,
+    ts: Date.now()
+  };
+
+  await admin.firestore().collection("listings").add(listing);
+
+  const isAdd = sub.name === "add";
+  if (isAdd) {
+    await awardPoints(user.id, user.displayName, 1, "Dodał " + MASTERY_TATTOO_NAME + " [" + bodyPart.label + "]");
+  }
+  const verb = isAdd ? "ma do oddania" : "szuka";
+  const headline = "**" + user.displayName + "** " + verb + " **" + MASTERY_TATTOO_NAME + "** [" + bodyPart.label + "]";
+
+  const matches = await findMatches(isAdd ? "search" : "add", masteryMatcher(bodyPart.key));
   var matchNote = "";
   if (matches.length > 0) {
     const names = matches
@@ -259,6 +321,8 @@ async function handleRemove(sub, user, interaction, res) {
   const data = doc.data();
   await docRef.delete();
 
+  const tag = data.kind === "mastery" ? data.bodyPartLabel : data.runeLabel;
+
   var bonusNote = "";
   const helperId = sub.opts.help;
 
@@ -273,19 +337,20 @@ async function handleRemove(sub, user, interaction, res) {
         helperId,
         helper.displayName,
         5,
-        "Pomógł/pomogła zdobyć: " + data.name + " [" + data.runeLabel + "] (dla " + user.displayName + ")"
+        "Pomógł/pomogła zdobyć: " + data.name + " [" + tag + "] (dla " + user.displayName + ")"
       );
       bonusNote = "\n+5 pkt dla <@" + helperId + "> — dzięki!";
       await sendWebhook(
-        "🏆 <@" + helperId + "> dostaje +5 pkt — pomógł/pomogła **" + user.displayName + "** zdobyć **" + data.name + "** [" + data.runeLabel + "]!"
+        "🏆 <@" + helperId + "> dostaje +5 pkt — pomógł/pomogła **" + user.displayName + "** zdobyć **" + data.name + "** [" + tag + "]!"
       );
 
-      const ownedMatches = await findOwnedMatch(helperId, "add", data.name, data.rune);
+      const matcher = data.kind === "mastery" ? masteryMatcher(data.bodyPart) : classMatcher(data.name, data.rune);
+      const ownedMatches = await findOwnedMatch(helperId, "add", matcher);
       if (ownedMatches.length === 1) {
         await ownedMatches[0].ref.delete();
         bonusNote += "\n♻️ Oferta <@" + helperId + "> na ten tatuaż też zniknęła z giełdy — transakcja zakończona.";
         await sendWebhook(
-          "♻️ Transakcja zakończona: oferta **" + data.name + "** [" + data.runeLabel + "] od <@" + helperId + "> została automatycznie usunięta."
+          "♻️ Transakcja zakończona: oferta **" + data.name + "** [" + tag + "] od <@" + helperId + "> została automatycznie usunięta."
         );
       } else if (ownedMatches.length > 1) {
         bonusNote += "\n⚠️ <@" + helperId + "> ma więcej niż jedną ofertę na ten tatuaż — usuń niepotrzebną ręcznie (`/tattoo remove`).";
@@ -296,7 +361,7 @@ async function handleRemove(sub, user, interaction, res) {
   res.json({
     type: InteractionResponseType.CHANNEL_MESSAGE_WITH_SOURCE,
     data: {
-      content: "Usunięto ogłoszenie: **" + data.name + "** [" + data.runeLabel + "]" + bonusNote,
+      content: "Usunięto ogłoszenie: **" + data.name + "** [" + tag + "]" + bonusNote,
       flags: EPHEMERAL
     }
   });
