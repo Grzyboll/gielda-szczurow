@@ -19,35 +19,29 @@ const { RUNE_COLORS, BODY_PARTS } = require("./tattoos");
 const runeChoices = RUNE_COLORS.map((r) => ({ name: r.label, value: r.key }));
 const bodyPartChoices = BODY_PARTS.map((b) => ({ name: b.label, value: b.key }));
 
-// rune/tatuaz zostają opcjonalne na poziomie Discorda, bo Discord nie wspiera
-// pól "wymaganych warunkowo" — walidacja (rune+tatuaz ALBO mistrzostwo+część
-// ciała) dzieje się w discordInteractions.js.
 const addSearchOptions = [
   {
     name: "rune",
-    description: "Kolor runy (pomiń przy tatuażu mistrzostwa)",
+    description: "Kolor runy",
     type: 3, // STRING
-    required: false,
+    required: true,
     choices: runeChoices
   },
   {
     name: "tatuaz",
-    description: "Nazwa tatuażu/bonusu klasowego — pisz i wybierz z podpowiedzi (pomiń dla mistrzostwa)",
+    description: "Zacznij pisać nazwę tatuażu / bonusu klasowego i wybierz z podpowiedzi",
     type: 3,
-    required: false,
+    required: true,
     autocomplete: true
-  },
-  {
-    name: "mistrzostwo",
-    description: "To tatuaż mistrzostwa (rzadki, bez efektu, nieprzypisany do klasy) — zamiast runy podaj część ciała",
-    type: 5, // BOOLEAN
-    required: false
-  },
+  }
+];
+
+const masteryAddSearchOptions = [
   {
     name: "czesc-ciala",
-    description: "Część ciała (tylko dla tatuażu mistrzostwa)",
+    description: "Część ciała, na którą nakłada się tatuaż mistrzostwa",
     type: 3,
-    required: false,
+    required: true,
     choices: bodyPartChoices
   }
 ];
@@ -93,6 +87,25 @@ const command = {
       description: "Pokaż ranking gildii (kto zdobył najwięcej punktów)",
       type: 1,
       options: []
+    },
+    {
+      name: "mistrzostwo",
+      description: "Tatuaże mistrzostwa — rzadkie, bez efektu, nieprzypisane do klasy/rasy",
+      type: 2, // SUB_COMMAND_GROUP
+      options: [
+        {
+          name: "add",
+          description: "Dodaj tatuaż mistrzostwa, który masz i chcesz oddać",
+          type: 1,
+          options: masteryAddSearchOptions
+        },
+        {
+          name: "search",
+          description: "Dodaj tatuaż mistrzostwa, którego szukasz",
+          type: 1,
+          options: masteryAddSearchOptions
+        }
+      ]
     }
   ]
 };

@@ -58,13 +58,22 @@ function resolveMentionedUser(interaction, userId) {
   return { id: userId, displayName };
 }
 
+const SUB_COMMAND_GROUP = 2;
+
 function getSubcommand(interaction) {
   const options = (interaction.data && interaction.data.options) || [];
-  const sub = options[0];
-  if (!sub) return { name: "", opts: {}, focused: null };
+  const top = options[0];
+  if (!top) return { group: "", name: "", opts: {}, focused: null };
+
+  const isGroup = top.type === SUB_COMMAND_GROUP;
+  const group = isGroup ? top.name : "";
+  const sub = isGroup ? (top.options && top.options[0]) : top;
+  if (!sub) return { group, name: "", opts: {}, focused: null };
+
   const opts = {};
   (sub.options || []).forEach((o) => { opts[o.name] = o.value; });
   return {
+    group,
     name: sub.name,
     opts,
     focused: (sub.options || []).find((o) => o.focused) || null
@@ -181,10 +190,6 @@ async function handleAutocomplete(interaction, res) {
 }
 
 async function handleAddOrSearch(sub, user, res) {
-  if (sub.opts.mistrzostwo === true) {
-    return handleMasteryAddOrSearch(sub, user, res);
-  }
-
   const tattooName = String(sub.opts.tatuaz || "").trim();
   const item = FLAT.find((it) => it.name === tattooName);
   const rune = RUNE_COLORS.find((r) => r.key === sub.opts.rune);
@@ -193,7 +198,7 @@ async function handleAddOrSearch(sub, user, res) {
     res.json({
       type: InteractionResponseType.CHANNEL_MESSAGE_WITH_SOURCE,
       data: {
-        content: "Wybierz tatuaż z podpowiedzi (autouzupełnianie) i runę, a nie wpisuj ich ręcznie. Dla tatuażu mistrzostwa zaznacz pole `mistrzostwo` i wybierz `czesc-ciala` zamiast tego.",
+        content: "Wybierz tatuaż z podpowiedzi (autouzupełnianie), a nie wpisuj go ręcznie.",
         flags: EPHEMERAL
       }
     });
@@ -250,7 +255,7 @@ async function handleMasteryAddOrSearch(sub, user, res) {
     res.json({
       type: InteractionResponseType.CHANNEL_MESSAGE_WITH_SOURCE,
       data: {
-        content: "Dla tatuażu mistrzostwa wybierz pole `czesc-ciala` (ramiona / klatka / plecy / nogi).",
+        content: "Wybierz część ciała z podpowiedzi (ramiona / klatka / plecy / nogi).",
         flags: EPHEMERAL
       }
     });
@@ -397,6 +402,11 @@ async function handleRanking(res) {
 async function handleCommand(interaction, res) {
   const sub = getSubcommand(interaction);
   const user = getDiscordUser(interaction);
+
+  if (sub.group === "mistrzostwo" && (sub.name === "add" || sub.name === "search")) {
+    await handleMasteryAddOrSearch(sub, user, res);
+    return;
+  }
 
   if (sub.name === "add" || sub.name === "search") {
     await handleAddOrSearch(sub, user, res);

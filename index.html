@@ -578,10 +578,10 @@
         <pre>/tattoo search rune:Umysł (zielona) tatuaz:wybraniec bogów</pre>
         <p class="help-note">Efekt: ogłoszenie trafia na listę "Poszukiwane" + webhook. Bez punktów — ale jeśli ktoś już to oferuje, bot Ci to od razu pokaże.</p>
 
-        <h4>Tatuaże mistrzostwa</h4>
-        <p>Osobna, bardzo rzadka kategoria — nie dają żadnego efektu i nie są przypisane do klasy ani rasy. Zamiast runy mają część ciała, na którą się nakłada (ramiona / klatka / plecy / nogi). Dodaje się je tym samym poleceniem <code>/tattoo add</code>/<code>/tattoo search</code> — zaznacz pole <code>mistrzostwo</code> i wybierz <code>czesc-ciala</code> zamiast pól <code>rune</code>/<code>tatuaz</code>:</p>
-        <pre>/tattoo add mistrzostwo:True czesc-ciala:Nogi</pre>
-        <p class="help-note">Reszta mechaniki (punkty, powiadomienia o dopasowaniu, usuwanie) działa tak samo jak dla zwykłych tatuaży.</p>
+        <h4><code>/tattoo mistrzostwo add</code> / <code>/tattoo mistrzostwo search</code> — tatuaże mistrzostwa</h4>
+        <p>Osobna, bardzo rzadka kategoria — nie dają żadnego efektu i nie są przypisane do klasy ani rasy. Zamiast runy i nazwy tatuażu podaje się tylko <code>czesc-ciala</code>, na którą tatuaż się nakłada (ramiona / klatka / plecy / nogi):</p>
+        <pre>/tattoo mistrzostwo add czesc-ciala:Nogi</pre>
+        <p class="help-note">Reszta mechaniki (punkty, powiadomienia o dopasowaniu, usuwanie przez <code>/tattoo remove</code>) działa tak samo jak dla zwykłych tatuaży.</p>
 
         <h4><code>/tattoo remove</code> — usuwasz swoje ogłoszenie</h4>
         <p>Pole <code>entry</code> podpowiada <strong>tylko Twoje</strong> ogłoszenia (i "Dostępne", i "Poszukiwane").</p>
