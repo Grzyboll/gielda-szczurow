@@ -2,7 +2,7 @@ const { onRequest } = require("firebase-functions/v2/https");
 const { defineSecret } = require("firebase-functions/params");
 const nacl = require("tweetnacl");
 const admin = require("firebase-admin");
-const { FLAT, RUNE_COLORS, BODY_PARTS, MASTERY_TATTOO_NAME } = require("./tattoos");
+const { FLAT, RUNE_COLORS, BODY_PARTS, MASTERY_TRAITS, MASTERY_TATTOO_NAME } = require("./tattoos");
 
 const discordPublicKey = defineSecret("DISCORD_PUBLIC_KEY");
 const discordWebhookUrl = defineSecret("DISCORD_WEBHOOK_URL");
@@ -98,8 +98,8 @@ function classMatcher(name, runeKey) {
   return (d) => d.kind !== "mastery" && d.name === name && d.rune === runeKey;
 }
 
-function masteryMatcher(bodyPartKey) {
-  return (d) => d.kind === "mastery" && d.bodyPart === bodyPartKey;
+function masteryMatcher(bodyPartKey, traitKey) {
+  return (d) => d.kind === "mastery" && d.bodyPart === bodyPartKey && d.trait === traitKey;
 }
 
 async function findMatches(oppositeType, matcherFn) {
@@ -178,7 +178,7 @@ async function handleAutocomplete(interaction, res) {
       .filter(({ data }) => !query || data.name.toLowerCase().includes(query))
       .slice(0, 25)
       .map(({ id, data }) => ({
-        name: (data.type === "add" ? "[Oddaję] " : "[Szukam] ") + data.name + " (" + (data.kind === "mastery" ? data.bodyPartLabel : data.runeLabel) + ")",
+        name: (data.type === "add" ? "[Oddaję] " : "[Szukam] ") + data.name + " (" + (data.kind === "mastery" ? data.bodyPartLabel + ", " + data.traitLabel : data.runeLabel) + ")",
         value: id
       }));
 
@@ -250,17 +250,20 @@ async function handleAddOrSearch(sub, user, res) {
 
 async function handleMasteryAddOrSearch(sub, user, res) {
   const bodyPart = BODY_PARTS.find((b) => b.key === sub.opts["czesc-ciala"]);
+  const trait = MASTERY_TRAITS.find((t) => t.key === sub.opts.cecha);
 
-  if (!bodyPart) {
+  if (!bodyPart || !trait) {
     res.json({
       type: InteractionResponseType.CHANNEL_MESSAGE_WITH_SOURCE,
       data: {
-        content: "Wybierz część ciała z podpowiedzi (ramiona / klatka / plecy / nogi).",
+        content: "Wybierz część ciała i cechę z podpowiedzi.",
         flags: EPHEMERAL
       }
     });
     return;
   }
+
+  const tag = bodyPart.label + ", " + trait.label;
 
   const listing = {
     discordUserId: user.id,
@@ -269,6 +272,8 @@ async function handleMasteryAddOrSearch(sub, user, res) {
     name: MASTERY_TATTOO_NAME,
     bodyPart: bodyPart.key,
     bodyPartLabel: bodyPart.label,
+    trait: trait.key,
+    traitLabel: trait.label,
     type: sub.name,
     ts: Date.now()
   };
@@ -277,12 +282,12 @@ async function handleMasteryAddOrSearch(sub, user, res) {
 
   const isAdd = sub.name === "add";
   if (isAdd) {
-    await awardPoints(user.id, user.displayName, 1, "Dodał " + MASTERY_TATTOO_NAME + " [" + bodyPart.label + "]");
+    await awardPoints(user.id, user.displayName, 1, "Dodał " + MASTERY_TATTOO_NAME + " [" + tag + "]");
   }
   const verb = isAdd ? "ma do oddania" : "szuka";
-  const headline = "**" + user.displayName + "** " + verb + " **" + MASTERY_TATTOO_NAME + "** [" + bodyPart.label + "]";
+  const headline = "**" + user.displayName + "** " + verb + " **" + MASTERY_TATTOO_NAME + "** [" + tag + "]";
 
-  const matches = await findMatches(isAdd ? "search" : "add", masteryMatcher(bodyPart.key));
+  const matches = await findMatches(isAdd ? "search" : "add", masteryMatcher(bodyPart.key, trait.key));
   var matchNote = "";
   if (matches.length > 0) {
     const names = matches
@@ -326,7 +331,7 @@ async function handleRemove(sub, user, interaction, res) {
   const data = doc.data();
   await docRef.delete();
 
-  const tag = data.kind === "mastery" ? data.bodyPartLabel : data.runeLabel;
+  const tag = data.kind === "mastery" ? (data.bodyPartLabel + ", " + data.traitLabel) : data.runeLabel;
 
   var bonusNote = "";
   const helperId = sub.opts.help;
@@ -349,7 +354,7 @@ async function handleRemove(sub, user, interaction, res) {
         "🏆 <@" + helperId + "> dostaje +5 pkt — pomógł/pomogła **" + user.displayName + "** zdobyć **" + data.name + "** [" + tag + "]!"
       );
 
-      const matcher = data.kind === "mastery" ? masteryMatcher(data.bodyPart) : classMatcher(data.name, data.rune);
+      const matcher = data.kind === "mastery" ? masteryMatcher(data.bodyPart, data.trait) : classMatcher(data.name, data.rune);
       const ownedMatches = await findOwnedMatch(helperId, "add", matcher);
       if (ownedMatches.length === 1) {
         await ownedMatches[0].ref.delete();

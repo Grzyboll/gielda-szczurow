@@ -79,9 +79,9 @@ const RUNE_COLORS = [
   { key: "zniszczenie", label: "Zniszczenie (czerwona)" }
 ];
 
-// Tatuaże mistrzostwa: osobna, bardzo rzadka kategoria — nie dają efektu i nie
-// są przypisane do żadnej klasy/rasy. Zamiast runy mają część ciała, na którą
-// się nakłada (dokładnie jedna z tych czterech).
+// Tatuaże mistrzostwa: osobna, bardzo rzadka kategoria, nieprzypisana do
+// żadnej klasy/rasy. Zamiast runy mają część ciała, na którą się nakłada
+// (dokładnie jedna z tych czterech), oraz cechę określającą bonus.
 const BODY_PARTS = [
   { key: "ramiona", label: "Ramiona" },
   { key: "klatka", label: "Klatka" },
@@ -89,6 +89,14 @@ const BODY_PARTS = [
   { key: "nogi", label: "Nogi" }
 ];
 
+const MASTERY_TRAITS = [
+  { key: "demon", label: "Demon (+inteligencja)" },
+  { key: "feniks", label: "Feniks (+wiedza)" },
+  { key: "pantera", label: "Pantera (+zręczność)" },
+  { key: "golem", label: "Golem (+siła)" },
+  { key: "behemot", label: "Behemot (+kondycja)" }
+];
+
 const MASTERY_TATTOO_NAME = "Tatuaż mistrzostwa";
 
-module.exports = { TATTOO_GROUPS, FLAT, RUNE_COLORS, BODY_PARTS, MASTERY_TATTOO_NAME };
+module.exports = { TATTOO_GROUPS, FLAT, RUNE_COLORS, BODY_PARTS, MASTERY_TRAITS, MASTERY_TATTOO_NAME };

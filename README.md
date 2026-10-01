@@ -38,7 +38,7 @@ Przy `add`/`search` bot dodatkowo:
 - sprawdza, czy po drugiej stronie (kogoś kto szuka / coś oferuje) już istnieje pasujący wpis na ten sam tatuaż + runę — jeśli tak, dopisuje w odpowiedzi kto to jest i oznacza go (`@wzmianka`), żeby można było się od razu odezwać;
 - wysyła ogłoszenie na webhook Discorda (ten sam mechanizm co dawniej — patrz niżej), więc nowy wpis widać na dedykowanym kanale niezależnie od tego, gdzie komenda została użyta.
 
-**Tatuaże mistrzostwa** — osobna, bardzo rzadka kategoria: nie dają efektu i nie są przypisane do klasy/rasy. Zamiast runy i nazwy tatuażu mają część ciała, na którą się nakłada (ramiona / klatka / plecy / nogi). Osobne podkomendy: **`/tattoo mistrzostwo add czesc-ciala:<część>`** i **`/tattoo mistrzostwo search czesc-ciala:<część>`**. Reszta mechaniki (punkty, dopasowania, usuwanie przez `/tattoo remove`) działa identycznie jak dla zwykłych tatuaży.
+**Tatuaże mistrzostwa** — osobna, bardzo rzadka kategoria, nieprzypisana do klasy/rasy. Zamiast runy i nazwy tatuażu mają część ciała, na którą się nakłada (ramiona / klatka / plecy / nogi), oraz cechę określającą bonus (Demon +inteligencja, Feniks +wiedza, Pantera +zręczność, Golem +siła, Behemot +kondycja). Osobne podkomendy: **`/tattoo mistrzostwo add czesc-ciala:<część> cecha:<cecha>`** i **`/tattoo mistrzostwo search czesc-ciala:<część> cecha:<cecha>`**. Reszta mechaniki (punkty, dopasowania, usuwanie przez `/tattoo remove`) działa identycznie jak dla zwykłych tatuaży — dopasowanie wymaga tej samej części ciała i tej samej cechy.
 
 Na stronie giełda i ranking są teraz w zakładkach ("Dostępne" / "Poszukiwane" / "Ranking gildii") zamiast jednej długiej listy do przewijania.
 

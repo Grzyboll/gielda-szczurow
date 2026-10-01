@@ -14,10 +14,11 @@ if (!applicationId || !botToken) {
   process.exit(1);
 }
 
-const { RUNE_COLORS, BODY_PARTS } = require("./tattoos");
+const { RUNE_COLORS, BODY_PARTS, MASTERY_TRAITS } = require("./tattoos");
 
 const runeChoices = RUNE_COLORS.map((r) => ({ name: r.label, value: r.key }));
 const bodyPartChoices = BODY_PARTS.map((b) => ({ name: b.label, value: b.key }));
+const traitChoices = MASTERY_TRAITS.map((t) => ({ name: t.label, value: t.key }));
 
 const addSearchOptions = [
   {
@@ -43,6 +44,13 @@ const masteryAddSearchOptions = [
     type: 3,
     required: true,
     choices: bodyPartChoices
+  },
+  {
+    name: "cecha",
+    description: "Cecha tatuażu mistrzostwa (bonus)",
+    type: 3,
+    required: true,
+    choices: traitChoices
   }
 ];
 
@@ -90,7 +98,7 @@ const command = {
     },
     {
       name: "mistrzostwo",
-      description: "Tatuaże mistrzostwa — rzadkie, bez efektu, nieprzypisane do klasy/rasy",
+      description: "Tatuaże mistrzostwa — rzadkie, nieprzypisane do klasy/rasy",
       type: 2, // SUB_COMMAND_GROUP
       options: [
         {
