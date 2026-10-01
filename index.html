@@ -18,6 +18,8 @@
     --accent-strong: #6e2116;
     --accent-contrast: #f5ece0;
     --danger: #8a2e1f;
+    --gold: #a9790a;
+    --gold-contrast: #2a1f14;
     --font-display: "Cinzel", Georgia, serif;
     --font-body: "Spectral", Georgia, "Times New Roman", serif;
     --font-mono: "JetBrains Mono", ui-monospace, SFMono-Regular, Menlo, monospace;
@@ -35,6 +37,8 @@
       --accent-strong: #f2954f;
       --accent-contrast: #1a1006;
       --danger: #e2664a;
+      --gold: #e3bb49;
+      --gold-contrast: #1a1006;
     }
   }
 
@@ -49,6 +53,8 @@
     --accent-strong: #f2954f;
     --accent-contrast: #1a1006;
     --danger: #e2664a;
+    --gold: #e3bb49;
+    --gold-contrast: #1a1006;
   }
 
   * { box-sizing: border-box; }
@@ -315,6 +321,12 @@
     padding: 14px 16px;
   }
 
+  .listing-row--mastery {
+    border-color: var(--gold);
+    border-left-color: var(--gold);
+    box-shadow: 0 0 10px -3px var(--gold);
+  }
+
   .listing-row-top {
     display: flex;
     align-items: baseline;
@@ -344,6 +356,11 @@
     background: var(--accent);
     border-radius: 999px;
     padding: 3px 10px;
+  }
+
+  .listing-tag--mastery {
+    color: var(--gold-contrast);
+    background: var(--gold);
   }
 
   .listing-rune {
@@ -778,7 +795,7 @@
 
     filtered.forEach(function (d) {
       var row = document.createElement("div");
-      row.className = "listing-row";
+      row.className = "listing-row" + (d.kind === "mastery" ? " listing-row--mastery" : "");
       var runeInfo = runeInfoFor(d);
       if (runeInfo) row.style.setProperty("--row-accent", runeInfo.swatch);
 
@@ -799,13 +816,13 @@
       if (detailLabel) {
         var rune = document.createElement("span");
         rune.className = "listing-rune";
-        rune.style.setProperty("--rune-swatch", runeInfo ? runeInfo.swatch : "var(--border)");
+        rune.style.setProperty("--rune-swatch", runeInfo ? runeInfo.swatch : (d.kind === "mastery" ? "var(--gold)" : "var(--border)"));
         rune.textContent = detailLabel;
         top.appendChild(rune);
       }
 
       var tag = document.createElement("span");
-      tag.className = "listing-tag";
+      tag.className = "listing-tag" + (d.kind === "mastery" ? " listing-tag--mastery" : "");
       tag.textContent = d.kind === "mastery" ? "Mistrzostwo" : (d.cls || "");
       top.appendChild(tag);
 

@@ -270,6 +270,22 @@ async function handleAddOrSearch(sub, user, res) {
     return;
   }
 
+  const isAdd = sub.name === "add";
+
+  if (isAdd) {
+    const existing = await findOwnedMatch(user.id, "add", classMatcher(item.name, rune.key));
+    if (existing.length > 0) {
+      res.json({
+        type: InteractionResponseType.CHANNEL_MESSAGE_WITH_SOURCE,
+        data: {
+          content: "Masz już dodany ten tatuaż na giełdzie: **" + item.name + "** [" + rune.label + "]. Nie dodawaj duplikatu — jeśli chcesz coś zmienić, najpierw usuń stary wpis (`/tattoo remove`).",
+          flags: EPHEMERAL
+        }
+      });
+      return;
+    }
+  }
+
   const listing = {
     discordUserId: user.id,
     discordUsername: user.displayName,
@@ -285,7 +301,6 @@ async function handleAddOrSearch(sub, user, res) {
 
   await admin.firestore().collection("listings").add(listing);
 
-  const isAdd = sub.name === "add";
   if (isAdd) {
     await awardPoints(user.id, user.displayName, 1, "Dodał tatuaż: " + item.name + " [" + rune.label + "]");
   }
@@ -327,6 +342,21 @@ async function handleMasteryAddOrSearch(sub, user, res) {
   }
 
   const tag = bodyPart.label + ", " + trait.label;
+  const isAdd = sub.name === "add";
+
+  if (isAdd) {
+    const existing = await findOwnedMatch(user.id, "add", masteryMatcher(bodyPart.key, trait.key));
+    if (existing.length > 0) {
+      res.json({
+        type: InteractionResponseType.CHANNEL_MESSAGE_WITH_SOURCE,
+        data: {
+          content: "Masz już dodany ten tatuaż mistrzostwa na giełdzie: **" + MASTERY_TATTOO_NAME + "** [" + tag + "]. Nie dodawaj duplikatu — jeśli chcesz coś zmienić, najpierw usuń stary wpis (`/tattoo remove`).",
+          flags: EPHEMERAL
+        }
+      });
+      return;
+    }
+  }
 
   const listing = {
     discordUserId: user.id,
@@ -343,7 +373,6 @@ async function handleMasteryAddOrSearch(sub, user, res) {
 
   await admin.firestore().collection("listings").add(listing);
 
-  const isAdd = sub.name === "add";
   if (isAdd) {
     await awardPoints(user.id, user.displayName, 1, "Dodał " + MASTERY_TATTOO_NAME + " [" + tag + "]");
   }
