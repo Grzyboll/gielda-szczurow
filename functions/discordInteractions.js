@@ -189,6 +189,71 @@ async function handleAutocomplete(interaction, res) {
   res.json({ type: InteractionResponseType.APPLICATION_COMMAND_AUTOCOMPLETE_RESULT, data: { choices: [] } });
 }
 
+function formatNames(docs) {
+  return docs.map((m) => m.discordUsername + (m.discordUserId ? " (<@" + m.discordUserId + ">)" : "")).join(", ");
+}
+
+async function handleCheck(sub, res) {
+  const tattooName = String(sub.opts.tatuaz || "").trim();
+  const item = FLAT.find((it) => it.name === tattooName);
+  const rune = RUNE_COLORS.find((r) => r.key === sub.opts.rune);
+
+  if (!item || !rune) {
+    res.json({
+      type: InteractionResponseType.CHANNEL_MESSAGE_WITH_SOURCE,
+      data: {
+        content: "Wybierz tatuaż z podpowiedzi (autouzupełnianie), a nie wpisuj go ręcznie.",
+        flags: EPHEMERAL
+      }
+    });
+    return;
+  }
+
+  const matcher = classMatcher(item.name, rune.key);
+  const offering = await findMatches("add", matcher);
+  const seeking = await findMatches("search", matcher);
+
+  const lines = [
+    "**" + item.name + "** [" + rune.label + "] (" + item.cls + ")",
+    offering.length > 0 ? "🟢 Ma do oddania: " + formatNames(offering) : "🟢 Nikt obecnie tego nie oferuje.",
+    seeking.length > 0 ? "🔍 Szuka: " + formatNames(seeking) : "🔍 Nikt obecnie tego nie szuka."
+  ];
+
+  res.json({
+    type: InteractionResponseType.CHANNEL_MESSAGE_WITH_SOURCE,
+    data: { content: lines.join("\n"), flags: EPHEMERAL }
+  });
+}
+
+async function handleMasteryCheck(sub, res) {
+  const bodyPart = BODY_PARTS.find((b) => b.key === sub.opts["czesc-ciala"]);
+  const trait = MASTERY_TRAITS.find((t) => t.key === sub.opts.cecha);
+
+  if (!bodyPart || !trait) {
+    res.json({
+      type: InteractionResponseType.CHANNEL_MESSAGE_WITH_SOURCE,
+      data: { content: "Wybierz część ciała i cechę z podpowiedzi.", flags: EPHEMERAL }
+    });
+    return;
+  }
+
+  const matcher = masteryMatcher(bodyPart.key, trait.key);
+  const offering = await findMatches("add", matcher);
+  const seeking = await findMatches("search", matcher);
+  const tag = bodyPart.label + ", " + trait.label;
+
+  const lines = [
+    "**" + MASTERY_TATTOO_NAME + "** [" + tag + "]",
+    offering.length > 0 ? "🟢 Ma do oddania: " + formatNames(offering) : "🟢 Nikt obecnie tego nie oferuje.",
+    seeking.length > 0 ? "🔍 Szuka: " + formatNames(seeking) : "🔍 Nikt obecnie tego nie szuka."
+  ];
+
+  res.json({
+    type: InteractionResponseType.CHANNEL_MESSAGE_WITH_SOURCE,
+    data: { content: lines.join("\n"), flags: EPHEMERAL }
+  });
+}
+
 async function handleAddOrSearch(sub, user, res) {
   const tattooName = String(sub.opts.tatuaz || "").trim();
   const item = FLAT.find((it) => it.name === tattooName);
@@ -231,9 +296,7 @@ async function handleAddOrSearch(sub, user, res) {
   const matches = await findMatches(isAdd ? "search" : "add", classMatcher(item.name, rune.key));
   var matchNote = "";
   if (matches.length > 0) {
-    const names = matches
-      .map((m) => m.discordUsername + (m.discordUserId ? " (<@" + m.discordUserId + ">)" : ""))
-      .join(", ");
+    const names = formatNames(matches);
     matchNote = isAdd
       ? "\n\n🔔 Ktoś już tego szuka: " + names
       : "\n\n🔔 To jest już dostępne! Ma to: " + names;
@@ -290,9 +353,7 @@ async function handleMasteryAddOrSearch(sub, user, res) {
   const matches = await findMatches(isAdd ? "search" : "add", masteryMatcher(bodyPart.key, trait.key));
   var matchNote = "";
   if (matches.length > 0) {
-    const names = matches
-      .map((m) => m.discordUsername + (m.discordUserId ? " (<@" + m.discordUserId + ">)" : ""))
-      .join(", ");
+    const names = formatNames(matches);
     matchNote = isAdd
       ? "\n\n🔔 Ktoś już tego szuka: " + names
       : "\n\n🔔 To jest już dostępne! Ma to: " + names;
@@ -413,8 +474,18 @@ async function handleCommand(interaction, res) {
     return;
   }
 
+  if (sub.group === "mistrzostwo" && sub.name === "check") {
+    await handleMasteryCheck(sub, res);
+    return;
+  }
+
   if (sub.name === "add" || sub.name === "search") {
     await handleAddOrSearch(sub, user, res);
+    return;
+  }
+
+  if (sub.name === "check") {
+    await handleCheck(sub, res);
     return;
   }
 

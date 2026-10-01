@@ -31,6 +31,7 @@ Funkcja `discordInteractions` (w [`functions/`](functions)) obsługuje komendę 
 
 - **`/tattoo add rune:<kolor> tatuaz:<nazwa>`** — masz ten tatuaż i chcesz go oddać. **+1 pkt** do rankingu.
 - **`/tattoo search rune:<kolor> tatuaz:<nazwa>`** — szukasz tego tatuażu. Bez punktów — to `add` (oddanie tatuażu) się liczy, nie samo szukanie.
+- **`/tattoo check rune:<kolor> tatuaz:<nazwa>`** — sprawdza, czy ktoś już ma do oddania lub szuka tego tatuażu, **bez dodawania własnego ogłoszenia** (więc nie trzeba potem niczego usuwać). Odpowiedź widoczna tylko dla Ciebie (ephemeral).
 - **`/tattoo remove entry:<Twoje ogłoszenie> [help:<@osoba>]`** — usuwa jedno z Twoich własnych ogłoszeń (podpowiedzi pokazują tylko Twoje wpisy). Jeśli usuwasz **poszukiwanie** bo je zdobyłeś, wskaż w opcjonalnym polu `help` osobę, która Ci pomogła (wybierasz ją jak przy zwykłej wzmiance @) — dostanie **+5 pkt**. Jeśli ta osoba ma na giełdzie dokładnie jedną ofertę tego samego tatuażu, bot automatycznie usunie też ją (transakcja zakończona); przy więcej niż jednej pasującej ofercie nic nie kasuje sam, tylko prosi o ręczne usunięcie.
 - **`/tattoo ranking`** — pokazuje top 10 graczy wg punktów.
 
@@ -38,7 +39,7 @@ Przy `add`/`search` bot dodatkowo:
 - sprawdza, czy po drugiej stronie (kogoś kto szuka / coś oferuje) już istnieje pasujący wpis na ten sam tatuaż + runę — jeśli tak, dopisuje w odpowiedzi kto to jest i oznacza go (`@wzmianka`), żeby można było się od razu odezwać;
 - wysyła ogłoszenie na webhook Discorda (ten sam mechanizm co dawniej — patrz niżej), więc nowy wpis widać na dedykowanym kanale niezależnie od tego, gdzie komenda została użyta.
 
-**Tatuaże mistrzostwa** — osobna, bardzo rzadka kategoria, nieprzypisana do klasy/rasy. Zamiast runy i nazwy tatuażu mają część ciała, na którą się nakłada (ramiona / klatka / plecy / nogi), oraz cechę określającą bonus (Demon +inteligencja, Feniks +wiedza, Pantera +zręczność, Golem +siła, Behemot +kondycja). Osobne podkomendy: **`/tattoo mistrzostwo add czesc-ciala:<część> cecha:<cecha>`** i **`/tattoo mistrzostwo search czesc-ciala:<część> cecha:<cecha>`**. Reszta mechaniki (punkty, dopasowania, usuwanie przez `/tattoo remove`) działa identycznie jak dla zwykłych tatuaży — dopasowanie wymaga tej samej części ciała i tej samej cechy.
+**Tatuaże mistrzostwa** — osobna, bardzo rzadka kategoria, nieprzypisana do klasy/rasy. Zamiast runy i nazwy tatuażu mają część ciała, na którą się nakłada (ramiona / klatka / plecy / nogi), oraz cechę określającą bonus (Demon +inteligencja, Feniks +wiedza, Pantera +zręczność, Golem +siła, Behemot +kondycja). Osobne podkomendy: **`/tattoo mistrzostwo add czesc-ciala:<część> cecha:<cecha>`**, **`/tattoo mistrzostwo search czesc-ciala:<część> cecha:<cecha>`** i **`/tattoo mistrzostwo check czesc-ciala:<część> cecha:<cecha>`** (sprawdza bez dodawania ogłoszenia). Reszta mechaniki (punkty, dopasowania, usuwanie przez `/tattoo remove`) działa identycznie jak dla zwykłych tatuaży — dopasowanie wymaga tej samej części ciała i tej samej cechy.
 
 Na stronie giełda i ranking są teraz w zakładkach ("Dostępne" / "Poszukiwane" / "Ranking gildii") zamiast jednej długiej listy do przewijania.
 

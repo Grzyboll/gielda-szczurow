@@ -71,6 +71,12 @@ const command = {
       options: addSearchOptions
     },
     {
+      name: "check",
+      description: "Sprawdź czy ktoś ma/szuka tego tatuażu — bez dodawania własnego ogłoszenia",
+      type: 1,
+      options: addSearchOptions
+    },
+    {
       name: "remove",
       description: "Usuń jedno ze swoich ogłoszeń",
       type: 1,
@@ -110,6 +116,12 @@ const command = {
         {
           name: "search",
           description: "Dodaj tatuaż mistrzostwa, którego szukasz",
+          type: 1,
+          options: masteryAddSearchOptions
+        },
+        {
+          name: "check",
+          description: "Sprawdź czy ktoś ma/szuka tego tatuażu mistrzostwa — bez dodawania ogłoszenia",
           type: 1,
           options: masteryAddSearchOptions
         }
